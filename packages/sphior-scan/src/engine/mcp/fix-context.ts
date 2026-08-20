@@ -98,7 +98,7 @@ function remediationStepsFor(f: CanonicalFinding): string[] {
         "Update the lockfile and re-run the scan to confirm the finding is resolved.",
       ];
     default: {
-      const steps: string[] = [`Review the flagged code at ${path}:${f.location.start_line}.`];
+      const steps: string[] = [`${LOCATION_STEP_PREFIX} ${path}:${f.location.start_line}.`];
       if (f.remediation) steps.push(f.remediation);
       else steps.push(`Apply the secure alternative for ${f.cwe ?? f.rule_id}.`);
       steps.push("Add a regression test covering the fixed behavior.");
@@ -106,6 +106,15 @@ function remediationStepsFor(f: CanonicalFinding): string[] {
     }
   }
 }
+
+/**
+ * 「どこを見るか」を指す手順の接頭辞。
+ *
+ * MCP / エージェント向けにはファイルパスが必須（相手はファイルを開くところから始める）。
+ * 一方エディタの診断では、その行そのものにカーソルがあるため冗長になる。消費側が文脈に
+ * 応じて除去できるよう、接頭辞を名前付きで公開する。
+ */
+export const LOCATION_STEP_PREFIX = "Review the flagged code at";
 
 function agentInstructions(f: CanonicalFinding): string {
   const loc = `${f.location.path} around line ${f.location.start_line}`;

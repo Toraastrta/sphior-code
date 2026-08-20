@@ -26,7 +26,7 @@ import {
   type CodeActionParams,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { runScan, buildFixContext } from "../engine/index";
+import { runScan, buildFixContext, LOCATION_STEP_PREFIX } from "../engine/index";
 import type { Severity, FixContext } from "../engine/index";
 import { initPython } from "../python-ast";
 import { initGo } from "../go-ast";
@@ -73,8 +73,13 @@ function scanDocument(doc: TextDocument): Diagnostic[] {
 
   return findings.map((f) => {
     const fc = buildFixContext(f);
-    // message に「なぜ + どう直すか」を載せる → host の AI がそのまま正確に修正できる
-    const steps = fc.remediation_steps.slice(0, 3).join(" ");
+    // message に「なぜ + どう直すか」を載せる → host の AI がそのまま正確に修正できる。
+    // 「どこを見るか」の手順はエディタでは冗長（その行にカーソルがある）ので落とす。
+    // MCP/エージェント向けの fixContext には残したままにする（相手はパスを必要とする）。
+    const steps = fc.remediation_steps
+      .filter((s) => !s.startsWith(LOCATION_STEP_PREFIX))
+      .slice(0, 2)
+      .join(" ");
     const data: SphiorDiagnosticData = { fingerprint: f.fingerprint, cwe: f.cwe, fixContext: fc };
     return {
       severity: SEVERITY_MAP[f.severity] ?? DiagnosticSeverity.Information,

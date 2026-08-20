@@ -28,7 +28,7 @@ export { runCli, type CliResult, type CliContext } from "./cli";
 // Framework マッピング（North Star）
 export { mapFindingToControls, summarizeControls, type ControlRef, type ControlCoverage, type Framework } from "./framework/map";
 // MCP ハンドオフ（§0.6 自前 AI ゼロ・修正は顧客 AI へ）
-export { buildFixContext, buildFixContexts, type FixContext } from "./mcp/fix-context";
+export { buildFixContext, buildFixContexts, LOCATION_STEP_PREFIX, type FixContext } from "./mcp/fix-context";
 export {
   handleScanFiles, handleExplainFinding, handleExplainFindings,
   handleListFindings, handleGetFinding, handleGetEvidencePack,
