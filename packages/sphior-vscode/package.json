@@ -1,0 +1,70 @@
+{
+  "name": "sphior-code",
+  "displayName": "SPHIOR CODE",
+  "description": "Deterministic secrets + insecure-pattern (CWE) detection with tamper-evident audit evidence. No AI, no source upload — runs locally.",
+  "version": "0.1.0",
+  "publisher": "sphior",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#0EA5E9",
+    "theme": "dark"
+  },
+  "homepage": "https://sphior.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Toraastrta/sphior-code.git",
+    "directory": "packages/sphior-vscode"
+  },
+  "bugs": {
+    "url": "https://sphior.com/support"
+  },
+  "qna": false,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "security",
+    "sast",
+    "secrets",
+    "cwe",
+    "audit",
+    "sphior"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "SPHIOR CODE",
+      "properties": {
+        "sphior.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable SPHIOR CODE deterministic scanning (secrets + insecure patterns)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "sync-server": "node scripts/copy-server.mjs",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run sync-server && node scripts/build.mjs",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  }
+}

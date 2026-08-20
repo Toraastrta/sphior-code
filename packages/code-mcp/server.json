@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.Toraastrta/sphior-code-mcp",
+  "description": "Deterministic SAST/SCA findings + fix guidance for your GitHub repos, handed to your AI agent.",
+  "version": "1.0.3",
+  "repository": {
+    "url": "https://github.com/Toraastrta/sphior-code",
+    "source": "github",
+    "subfolder": "packages/code-mcp"
+  },
+  "websiteUrl": "https://sphior.com/code",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "sphior-code-mcp",
+      "version": "1.0.3",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SPHIOR_API_KEY",
+          "description": "Your SPHIOR CODE API key (sk_live_...). Create one at https://sphior.com/account/api.",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "SPHIOR_API_BASE",
+          "description": "Override the API base URL for self-hosted / regional deployments. Default: https://sphior.com/api/v1",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

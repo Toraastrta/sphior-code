@@ -1,0 +1,8 @@
+src/**
+scripts/**
+tsconfig.json
+.gitignore
+.vscodeignore
+PUBLISHING.md
+**/*.map
+node_modules/**

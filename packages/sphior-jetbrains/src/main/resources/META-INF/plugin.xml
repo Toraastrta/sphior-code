@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.sphior.code</id>
+    <name>SPHIOR CODE</name>
+    <vendor url="https://sphior.com" email="support@sphior.com">SPHIOR</vendor>
+
+    <description><![CDATA[
+      <p><b>SPHIOR CODE</b> — deterministic <b>secrets</b> + insecure-pattern (<b>CWE</b>) detection with
+      tamper-evident audit evidence, right in your JetBrains IDE.</p>
+      <ul>
+        <li><b>No AI, no source upload.</b> Detection is 100% deterministic and runs locally via a
+        bundled language server. Your code never leaves your machine.</li>
+        <li><b>Same engine as SPHIOR's service.</b> The detection engine here is the one SPHIOR runs
+        server-side, so what you see in the IDE matches what a connected repository reports. The plugin
+        itself is entirely local — connecting a repository to SPHIOR is optional and separate.</li>
+        <li><b>Fix with your own AI.</b> SPHIOR hands findings to your existing AI assistant over MCP —
+        it does not generate code for you.</li>
+      </ul>
+      <p><b>Languages:</b> JavaScript, TypeScript (+ JSX/TSX), Python, Go, PHP, Ruby, Java, C#, Rust,
+      Kotlin, C, C++, Scala, Swift — analysed with real parsers (tree-sitter), not just regex.</p>
+      <p><b>Requires Node.js</b> on PATH (or set <code>SPHIOR_NODE_PATH</code>). Depends on the LSP4IJ plugin.</p>
+    ]]></description>
+
+    <!-- 全 JetBrains IDE で動くよう platform + LSP4IJ にのみ依存（言語プラグイン非依存） -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <!-- Node.js 未検出などを利用者に伝えるための通知グループ -->
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="SPHIOR CODE" displayType="BALLOON"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <server id="sphior"
+                name="SPHIOR CODE"
+                factoryClass="com.sphior.code.SphiorLspServerFactory">
+            <description>Deterministic secrets + CWE detection (no AI, runs locally).</description>
+        </server>
+        <!-- 言語プラグインに依存せずファイル名パターンでマッピング（全 IDE 横断） -->
+        <fileNamePatternMapping patterns="*.js;*.jsx;*.ts;*.tsx;*.mjs;*.cjs;*.py;*.go;*.php;*.rb;*.java;*.cs;*.rs;*.kt;*.kts;*.c;*.h;*.cpp;*.cc;*.cxx;*.hpp;*.hh;*.hxx;*.scala;*.sc;*.swift" serverId="sphior"/>
+    </extensions>
+</idea-plugin>

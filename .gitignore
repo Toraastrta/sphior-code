@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+*.vsix
+*.zip
+package-lock.json
+
+# generated at build time
+packages/sphior-scan/src/gen/
+packages/sphior-vscode/server/
+packages/sphior-jetbrains/src/main/resources/server/
+
+# gradle / jetbrains
+.gradle/
+.kotlin/
+.intellijPlatform/
+
+.DS_Store

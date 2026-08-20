@@ -1,0 +1,56 @@
+{
+  "name": "@sphior/scan",
+  "version": "0.1.0",
+  "description": "SPHIOR CODE deterministic scan engine — secrets + insecure-pattern (CWE) + SCA detection with tamper-evident evidence. One engine shared by CLI, LSP (VS Code / JetBrains) and CI.",
+  "type": "module",
+  "bin": {
+    "sphior-scan": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Toraastrta/sphior-code.git",
+    "directory": "packages/sphior-scan"
+  },
+  "homepage": "https://sphior.com/code",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "gen:wasm": "node scripts/gen-wasm.mjs",
+    "prepare:src": "npm run gen:wasm",
+    "typecheck": "npm run prepare:src && tsc --noEmit",
+    "build": "npm run prepare:src && node scripts/build.mjs",
+    "lsp": "npm run build && node dist/server.cjs --stdio",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "sphior",
+    "sast",
+    "sca",
+    "secrets",
+    "security",
+    "lsp",
+    "cli",
+    "audit",
+    "evidence"
+  ],
+  "dependencies": {
+    "@babel/parser": "^7.28.5",
+    "tree-sitter-wasms": "^0.1.13",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "web-tree-sitter": "^0.25.10"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}

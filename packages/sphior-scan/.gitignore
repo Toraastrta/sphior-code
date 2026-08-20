@@ -1,0 +1,5 @@
+node_modules
+dist
+package-lock.json
+# 生成される WASM base64 blob（gen-wasm.mjs）
+src/gen

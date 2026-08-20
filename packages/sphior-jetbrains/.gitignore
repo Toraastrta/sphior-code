@@ -1,0 +1,9 @@
+.gradle
+build
+*.zip
+# gradle wrapper jar（`gradle wrapper` で生成）
+gradle/wrapper/gradle-wrapper.jar
+# 同梱される生成物（単一ソースは @sphior/scan → ../../src/lib/scan）
+src/main/resources/server
+# IntelliJ Platform Gradle Plugin のローカルキャッシュ
+.intellijPlatform
