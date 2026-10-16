@@ -2,6 +2,14 @@
 
 All notable changes to the **SPHIOR CODE** VS Code extension are documented here.
 
+## [0.1.2] — 2026-10-16
+
+- The extension pointed at a private repository, so the "Repository" link on the
+  marketplace page was a 404 for everyone. It now points at the public source,
+  github.com/Toraastrta/sphior-code.
+- Rebuilt against the current language server. Detection is unchanged — the rule
+  set is the same `2026.07.12-22` that 0.1.1 shipped.
+
 ## [0.1.1] — 2026-09-04
 
 - Updated the extension icon to the SPHIOR brand mark. No functional changes —

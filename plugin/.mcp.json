@@ -2,7 +2,10 @@
   "mcpServers": {
     "sphior-code": {
       "command": "npx",
-      "args": ["-y", "sphior-code-mcp"]
+      "args": [
+        "-y",
+        "sphior-code-mcp@1.1.4"
+      ]
     }
   }
 }
