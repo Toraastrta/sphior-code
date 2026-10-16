@@ -30,10 +30,10 @@ ready-to-paste fix prompt. To make your agent fix SPHIOR findings **automaticall
 
 ```bash
 # 1. build the shared engine + LSP server
-cd packages/sphior-scan && npm install && npm run build
-# 2. build the extension (bundles the server produced above)
+cd ../sphior-scan && npm install && npm run build
+# 2. build the extension
 cd ../sphior-vscode && npm install && npm run build
 ```
 
-The extension bundles the deterministic engine from `packages/sphior-scan` — the CLI, the
-language server and CI all run the exact same detection code.
+The extension bundles the deterministic engine — the single source of truth is
+`packages/sphior-scan/src/engine` (synced into `@sphior/scan` at build time; no drift).

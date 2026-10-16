@@ -41,6 +41,13 @@ export interface FixContext {
   agent_instructions: string;
   /** データ境界の明示（監査・信頼のため常に付与）。 */
   data_boundary_note: string;
+  /**
+   * 同じ location に出た他の検出（まとめた結果）。
+   * 別ルールが同一箇所を指すのは誤検知ではなく正当な多重検出だが、
+   * エージェントにそのまま渡すと同じ箇所を複数回直そうとする。1 件にまとめ、
+   * 同時に満たすべき条件としてここに併記する。単独検出なら空配列。
+   */
+  also: Array<{ rule_id: string; severity: Severity; cwe?: string; title: string }>;
 }
 
 const DATA_BOUNDARY_NOTE =
@@ -153,13 +160,65 @@ export function buildFixContext(f: CanonicalFinding): FixContext {
     references: f.references ?? [],
     agent_instructions: agentInstructions(f),
     data_boundary_note: DATA_BOUNDARY_NOTE,
+    also: [],
   };
 }
 
-/** 複数 finding → FixContext[]（severity 高→低で安定ソート、決定論）。 */
+const SEV_ORDER: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
+
+/**
+ * 複数 finding → FixContext[]（severity 高→低で安定ソート、決定論）。
+ *
+ * 同一 location（path + 行）の検出は 1 件にまとめる。別ルールが同じ行を指すのは
+ * 正当な多重検出（例: taint 解析と pattern 検出が同じ exec を指す、Stripe 固有
+ * ルールと汎用エントロピー検出が同じ秘密を指す）だが、そのまま渡すとエージェントが
+ * 同じ箇所を複数回直そうとする。最も重い検出を主とし、残りを also に併記して
+ * remediation_steps を重複なく統合する。
+ *
+ * まとめても情報は落とさない（rule_id / severity / cwe は also に残る）。
+ */
 export function buildFixContexts(findings: CanonicalFinding[]): FixContext[] {
-  const order: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
-  return findings
-    .map(buildFixContext)
-    .sort((a, b) => order[a.severity] - order[b.severity]);
+  const byLocation = new Map<string, FixContext[]>();
+  for (const f of findings) {
+    const ctx = buildFixContext(f);
+    const key = `${ctx.location.path}:${ctx.location.start_line}:${ctx.location.end_line}`;
+    const bucket = byLocation.get(key);
+    if (bucket) bucket.push(ctx);
+    else byLocation.set(key, [ctx]);
+  }
+
+  const merged: FixContext[] = [];
+  for (const group of byLocation.values()) {
+    // 重い順に並べ、先頭を主とする（同 severity なら元の順＝決定論）
+    group.sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity]);
+    const [primary, ...rest] = group;
+    if (rest.length === 0) { merged.push(primary); continue; }
+
+    const seen = new Set(primary.remediation_steps);
+    const steps = [...primary.remediation_steps];
+    for (const r of rest) {
+      for (const step of r.remediation_steps) {
+        if (seen.has(step)) continue;
+        seen.add(step);
+        steps.push(step);
+      }
+    }
+    const alsoTitles = rest.map((r) => `${r.title}${r.cwe ? ` (${r.cwe})` : ""}`).join("; ");
+    merged.push({
+      ...primary,
+      // まとめた結果を指示文にも反映する。1 箇所に複数の検出がある事実を伝えないと、
+      // エージェントは主の 1 件だけ直して残りを見落とす
+      agent_instructions:
+        `${primary.agent_instructions} ` +
+        `This location has ${group.length} findings — your single fix must satisfy all of them, ` +
+        `not just the first: ${alsoTitles}.`,
+      remediation_steps: steps,
+      references: [...new Set([...primary.references, ...rest.flatMap((r) => r.references)])],
+      also: rest.map((r) => ({
+        rule_id: r.rule_id, severity: r.severity, cwe: r.cwe, title: r.title,
+      })),
+    });
+  }
+
+  return merged.sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity]);
 }

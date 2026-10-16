@@ -1,7 +1,7 @@
 /**
  * orchestrator.ts — マルチエンジン統合の単一点（PLAN §4.2 / P0-2）
  *
- * 複数エンジン（自前 SAST/SCA + 採用 OSS: Trivy/ZAP/Nuclei…）の CanonicalFinding[] を
+ * 複数エンジン（自前 SAST/SCA + 採用 OSS の SCA/DAST/IaC エンジン）の CanonicalFinding[] を
  *   union → 正規化 → fingerprint dedup → クロスエンジン一致で確度昇格
  * に集約する。DAST 側の決定論（derive-disposition / confidence-model）と同じ思想を
  * SAST/SCA/IaC にも横展開する土台。

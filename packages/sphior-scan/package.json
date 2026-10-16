@@ -1,17 +1,18 @@
 {
   "name": "@sphior/scan",
-  "version": "0.1.0",
-  "description": "SPHIOR CODE deterministic scan engine — secrets + insecure-pattern (CWE) + SCA detection with tamper-evident evidence. One engine shared by CLI, LSP (VS Code / JetBrains) and CI.",
+  "version": "0.1.4",
+  "description": "Deterministic source scanner — hardcoded secrets and insecure patterns (CWE) with AST/taint analysis. No AI, no network, no source upload. CLI + LSP for editors and CI.",
   "type": "module",
   "bin": {
-    "sphior-scan": "./dist/cli.js"
+    "sphior-scan": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Toraastrta/sphior-code.git",
+    "url": "git+https://github.com/Toraastrta/Sphior.git",
     "directory": "packages/sphior-scan"
   },
   "homepage": "https://sphior.com/code",
@@ -22,9 +23,10 @@
     "gen:wasm": "node scripts/gen-wasm.mjs",
     "prepare:src": "npm run gen:wasm",
     "typecheck": "npm run prepare:src && tsc --noEmit",
-    "build": "npm run prepare:src && node scripts/build.mjs",
+    "build": "npm run prepare:src && node scripts/build.mjs && npm run gen:notices",
     "lsp": "npm run build && node dist/server.cjs --stdio",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "gen:notices": "node scripts/gen-notices.mjs"
   },
   "engines": {
     "node": ">=18"

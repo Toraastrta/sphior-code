@@ -70,8 +70,11 @@ cd packages/sphior-scan && npm install && npm run build
 cd ../sphior-vscode && npm install && npm run build
 
 # 2b. JetBrains plugin (requires JDK 21)
-cd ../sphior-jetbrains && node scripts/copy-server.mjs && ./gradlew buildPlugin
+cd ../sphior-jetbrains && ./gradlew buildPlugin
 ```
+
+The Gradle build syncs the language server produced in step 1 before packaging, so there
+is no copy step to remember — it fails rather than bundling a stale server.
 
 ### Try the CLI
 

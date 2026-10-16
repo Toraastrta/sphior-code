@@ -12,6 +12,8 @@ import { z } from "zod";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { api, SphiorApiError } from "../api-client.js";
 import { log } from "../logger.js";
+import { CONFIG } from "../config.js";
+import { localFixContext } from "../local-scan.js";
 
 // ── Tool result wrapper ───────────────────────────────────────────────────────
 
@@ -31,6 +33,19 @@ function err(message: string): ToolResult {
     content: [{ type: "text", text: message }],
     isError: true,
   };
+}
+
+/**
+ * cloud 専用ツールのガード。local モードでは鍵が無いので API を叩けない。
+ * 黙って失敗させず、「何が要るか」を返して行き止まりにしない。
+ */
+function requiresCloud(tool: string): ToolResult | null {
+  if (CONFIG.mode === "cloud") return null;
+  return err(
+    `${tool} requires a SPHIOR account (SPHIOR_API_KEY).\n` +
+    `You are running in local mode. Without a key you can use get_fix_context and health_check.\n` +
+    `get_fix_context scans the local workspace and returns findings ready to fix.`,
+  );
 }
 
 async function safe<T>(fn: () => Promise<T>): Promise<ToolResult> {
@@ -76,6 +91,7 @@ const VerifyEvidenceArgs = z.object({
 });
 
 const FixContextArgs = z.object({
+  path:      z.string().optional().describe("Local directory to scan (local mode only). Defaults to the current workspace."),
   repo:      z.string().optional().describe("Repository full_name (owner/repo). Omit for the latest scanned repo."),
   findingId: z.string().optional().describe("A specific finding fingerprint to fix. Omit for all findings."),
   severity:  SeverityEnum.optional().describe("Filter to one severity."),
@@ -179,14 +195,17 @@ export const TOOLS: Tool[] = [
   {
     name: "get_fix_context",
     description:
-      "Get deterministic remediation guidance for SPHIOR's code findings so YOU (the AI agent) can fix them. " +
+      "Scan for security problems and get deterministic remediation guidance so YOU (the AI agent) can fix them. " +
+      "Works with no account: without SPHIOR_API_KEY it scans the local workspace with the bundled engine. " +
       "SPHIOR does not generate code or transmit source — open the referenced file in your workspace, read the " +
       "code yourself, and apply the fix. Returns why-it-matters, remediation steps, exact location, and references. " +
+      "Findings at the same line are merged into one entry; `also` lists the others and one fix must satisfy all. " +
       "A human must review before merge.",
     inputSchema: {
       type: "object",
       properties: {
-        repo:       { type: "string", description: "Repository full_name (owner/repo). Omit for the latest scanned repo." },
+        path:       { type: "string", description: "Local mode only: directory to scan. Omit to scan the directory this server was launched in. Use it to narrow a large repository." },
+        repo:       { type: "string", description: "Cloud mode only: repository full_name (owner/repo). Omit for the latest scanned repo." },
         findingId:  { type: "string", description: "A specific finding fingerprint to fix. Omit for all findings." },
         severity:   { type: "string", enum: ["critical", "high", "medium", "low"], description: "Filter to one severity." },
       },
@@ -213,26 +232,31 @@ type Handler = (args: unknown) => Promise<ToolResult>;
 
 export const HANDLERS: Record<string, Handler> = {
   list_findings: async (args) => {
+    const gate = requiresCloud("list_findings"); if (gate) return gate;
     const a = ListFindingsArgs.parse(args ?? {});
     return safe(() => api.listFindings(a));
   },
 
   get_finding: async (args) => {
+    const gate = requiresCloud("get_finding"); if (gate) return gate;
     const a = FindingIdArgs.parse(args);
     return safe(() => api.getFinding(a.findingId));
   },
 
   get_security_summary: async () => {
+    const gate = requiresCloud("get_security_summary"); if (gate) return gate;
     return safe(() => api.getSummary());
   },
 
 
   resolve_finding: async (args) => {
+    const gate = requiresCloud("resolve_finding"); if (gate) return gate;
     const a = ResolveArgs.parse(args);
     return safe(() => api.resolveFinding(a.findingId, a.reason));
   },
 
   mark_false_positive: async (args) => {
+    const gate = requiresCloud("mark_false_positive"); if (gate) return gate;
     const a = FpArgs.parse(args);
     return safe(() => api.markFalsePositive(a.findingId, a.reason));
   },
@@ -252,10 +276,17 @@ export const HANDLERS: Record<string, Handler> = {
 
   get_fix_context: async (args) => {
     const a = FixContextArgs.parse(args ?? {});
+    // local モード: サーバーを使わず同梱エンジンでワークスペースを走査する
+    if (CONFIG.mode === "local") {
+      return safe(() => localFixContext({
+        path: a.path, findingId: a.findingId, severity: a.severity, timeoutMs: CONFIG.timeoutMs,
+      }));
+    }
     return safe(() => api.getFixContext({ repo: a.repo, findingId: a.findingId, severity: a.severity }));
   },
 
   verify_evidence: async (args) => {
+    const gate = requiresCloud("verify_evidence"); if (gate) return gate;
     const a = VerifyEvidenceArgs.parse(args ?? {});
     return safe(() => api.verifyEvidence({ repo: a.repo, includePack: a.includePack }));
   },

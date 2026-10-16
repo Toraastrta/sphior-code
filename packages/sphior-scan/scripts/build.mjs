@@ -12,7 +12,14 @@ import { rmSync } from "node:fs";
 
 rmSync("dist", { recursive: true, force: true });
 
-const common = { bundle: true, platform: "node", target: "node18", logLevel: "warning" };
+// legalComments: "eof" — 依存（MIT 等）の著作権表示をバンドル末尾に残す。
+// esbuild の既定はこれらを捨ててしまうが、MIT は「複製物に著作権表示を含めること」を
+// 条件にしているので、バンドル配布では明示的に保持する必要がある。
+// 監査証跡を売っている以上、自分たちの配布物のライセンス順守が崩れているのは筋が通らない。
+const common = {
+  bundle: true, platform: "node", target: "node18", logLevel: "warning",
+  legalComments: "eof",
+};
 
 // CLI — ESM
 await build({

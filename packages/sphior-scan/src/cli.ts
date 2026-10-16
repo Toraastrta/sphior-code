@@ -23,7 +23,10 @@ async function main(): Promise<void> {
   await Promise.all([initPython(), initGo(), initPhp(), initRuby(), initJava(), initCsharp(), initRust(), initKotlin(), initC(), initCpp(), initScala(), initSwift()].map((p) => p.catch(() => {})));
   const res = runCli(process.argv.slice(2), {
     cwd: process.cwd(),
-    log: (m) => console.log(m),
+    log: (m) => console.log(m),              // データ（SARIF）
+    logErr: (m) => console.error(m),         // 診断（サマリ・警告・ヒント）
+    // 端末なら人が読む形、パイプ/リダイレクトなら SARIF（`| jq` を壊さない）
+    isTty: Boolean(process.stdout.isTTY),
   });
   process.exit(res.exitCode);
 }

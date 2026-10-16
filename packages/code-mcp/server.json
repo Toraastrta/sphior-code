@@ -1,10 +1,10 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.Toraastrta/sphior-code-mcp",
-  "description": "Deterministic SAST/SCA findings + fix guidance for your GitHub repos, handed to your AI agent.",
-  "version": "1.0.3",
+  "description": "Deterministic SAST/SCA findings + fix guidance for your AI agent. Runs locally, no account needed.",
+  "version": "1.1.2",
   "repository": {
-    "url": "https://github.com/Toraastrta/sphior-code",
+    "url": "https://github.com/Toraastrta/Sphior",
     "source": "github",
     "subfolder": "packages/code-mcp"
   },
@@ -14,16 +14,22 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "sphior-code-mcp",
-      "version": "1.0.3",
+      "version": "1.1.2",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "SPHIOR_API_KEY",
-          "description": "Your SPHIOR CODE API key (sk_live_...). Create one at https://sphior.com/account/api.",
-          "isRequired": true,
+          "description": "Optional. Without it the server runs in local mode: it scans your workspace with the bundled deterministic engine and returns fix guidance. Set it to also get tamper-evident evidence, history and GRC integrations. Create one at https://sphior.com/account/code.",
+          "isRequired": false,
           "isSecret": true
+        },
+        {
+          "name": "SPHIOR_WORKSPACE",
+          "description": "Optional. Directory to scan in local mode. Defaults to the directory your client launches the server in.",
+          "isRequired": false,
+          "isSecret": false
         },
         {
           "name": "SPHIOR_API_BASE",

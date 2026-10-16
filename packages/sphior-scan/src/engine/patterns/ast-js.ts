@@ -1,5 +1,5 @@
 /**
- * ast-js.ts — JS/TS の AST ベース検出（Tier 3・Semgrep 級への第一歩）
+ * ast-js.ts — JS/TS の AST ベース検出（Tier 3・構文パターン照合の第一歩）
  *
  * 正規表現は「文字列/コメントの中の eval(」も拾って誤検知するが、AST は
  * それが本当に CallExpression（関数呼び出し）かを構文的に判定するため

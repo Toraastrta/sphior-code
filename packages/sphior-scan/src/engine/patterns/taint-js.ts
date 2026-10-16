@@ -1,5 +1,5 @@
 /**
- * taint-js.ts — JS/TS の intra-procedural taint 解析（Tier 4・Semgrep の真価）
+ * taint-js.ts — JS/TS の intra-procedural taint 解析（Tier 4・データフロー解析の本体）
  *
  * 「危険な書き方」ではなく「**信頼できない入力（source）が危険な地点（sink）へ
  * 到達する本物の脆弱性**」を検出する。関数スコープ内で source から始まる汚染を

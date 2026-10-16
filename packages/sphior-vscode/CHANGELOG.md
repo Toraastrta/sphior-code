@@ -2,6 +2,11 @@
 
 All notable changes to the **SPHIOR CODE** VS Code extension are documented here.
 
+## [0.1.1] — 2026-09-04
+
+- Updated the extension icon to the SPHIOR brand mark. No functional changes —
+  detection, the bundled language server and the Quick Fix action are unchanged.
+
 ## [0.1.0] — 2026-07-12
 
 Initial release.

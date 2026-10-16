@@ -4,8 +4,20 @@
  * 環境変数から設定を読み、不正値・必須値欠落を起動時にチェックする。
  */
 
+import { createRequire } from "node:module";
+
+/**
+ * 動作モード:
+ *  - "local" … SPHIOR_API_KEY なし。同梱の決定論エンジンでワークスペースを走査し、
+ *              get_fix_context だけをローカルで返す（アカウント不要で価値が完結する経路）。
+ *  - "cloud" … API キーあり。サーバー側の finding・証跡・履歴まで使える。
+ */
+export type Mode = "local" | "cloud";
+
 export interface Config {
-  apiKey:  string;
+  mode: Mode;
+  /** local モードでは null。 */
+  apiKey:  string | null;
   baseUrl: string;
   timeoutMs: number;
   debug: boolean;
@@ -13,20 +25,24 @@ export interface Config {
   version: string;
 }
 
-const PACKAGE_VERSION = "1.0.0";
+// package.json を正とする。固定値にすると公開版とズレる（1.1.0 を出した時点で
+// serverInfo は 1.0.0 のままだった）。dist/ も src/ も一つ上が package root。
+const PACKAGE_VERSION: string = (() => {
+  try {
+    return createRequire(import.meta.url)("../package.json").version as string;
+  } catch {
+    return "0.0.0";
+  }
+})();
 
 function readEnv(): Config {
-  const apiKey = process.env.SPHIOR_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error(
-      "SPHIOR_API_KEY environment variable is required.\n" +
-      "Get your API key at: https://sphior.com/account/code/api-keys",
-    );
-  }
-  if (!apiKey.startsWith("sk_")) {
+  // キー未設定は異常ではなく local モード。鍵を取りに行かせずに試せることを優先する
+  // （拡張は 100% ローカルで動くのに MCP だけアカウント必須、という非対称を解消する）。
+  const apiKey = process.env.SPHIOR_API_KEY?.trim() || null;
+  if (apiKey && !apiKey.startsWith("sk_")) {
     throw new Error(
       `Invalid SPHIOR_API_KEY format (expected sk_live_... or sk_test_...).\n` +
-      `Get your API key at: https://sphior.com/account/code/api-keys`,
+      `Get your API key at: https://sphior.com/app?settings=api`,
     );
   }
 
@@ -39,6 +55,7 @@ function readEnv(): Config {
   }
 
   return {
+    mode: apiKey ? "cloud" : "local",
     apiKey,
     baseUrl,
     timeoutMs,

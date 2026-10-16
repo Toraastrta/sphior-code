@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.sphior"
-version = "0.1.0"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -37,6 +37,12 @@ dependencies {
 }
 
 intellijPlatform {
+    // publishPlugin にトークンの受け取り口が無く `-Ptoken=` が無視されていたので配線する
+    // （BUILD.md はこの書き方を前提に書かれていた）。環境変数でも渡せるようにしておく。
+    publishing {
+        token = providers.gradleProperty("token")
+            .orElse(providers.environmentVariable("JETBRAINS_MARKETPLACE_TOKEN"))
+    }
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "242"
@@ -58,3 +64,33 @@ intellijPlatform {
 kotlin {
     jvmToolchain(21)
 }
+
+// ── LSP サーバの同梱を自動化 ──────────────────────────────────────────────────
+// src/main/resources/server/server.cjs は @sphior/scan の生成物で、手で
+// `node scripts/copy-server.mjs` を叩く運用だった。VS Code 拡張は npm run build が
+// 自動で同期するのに、こちらだけ手動だったためエンジン更新時に取り残される
+// （実際 2026-10-16 時点で 9/5 のまま取り残されていた）。
+// processResources に前置して、ビルドのたびに必ず最新が入るようにする。
+val syncLspServer by tasks.registering(Exec::class) {
+    group = "build"
+    description = "@sphior/scan の server.cjs を resources へ同期する"
+    workingDir = projectDir
+    commandLine("node", "scripts/copy-server.mjs")
+
+    // 入出力を宣言して up-to-date 判定を効かせる（毎回 30MB コピーしない）
+    inputs.file(projectDir.resolve("../sphior-scan/dist/server.cjs"))
+    outputs.file(projectDir.resolve("src/main/resources/server/server.cjs"))
+
+    // @sphior/scan が未ビルドなら、理由を明示して止める（黙って古い物を同梱しない）
+    doFirst {
+        val engine = projectDir.resolve("../sphior-scan/dist/server.cjs")
+        if (!engine.exists()) {
+            throw GradleException(
+                "LSP サーバが見つかりません: $engine\n" +
+                "  → packages/sphior-scan で `npm run build` を先に実行してください。",
+            )
+        }
+    }
+}
+
+tasks.named("processResources") { dependsOn(syncLspServer) }

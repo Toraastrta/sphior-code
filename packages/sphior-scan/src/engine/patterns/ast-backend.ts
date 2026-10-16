@@ -2,7 +2,7 @@
  * ast-backend.ts — 言語別 AST 検出の pluggable レジストリ（純 TS・多言語）
  *
  * tree-sitter を要する言語（Python/Go/Ruby/PHP…）の AST/taint は engine core や
- * 利用側の静的依存にせず、CLI/LSP が起動時に**動的登録**する。
+ * Next.js アプリ の静的依存にせず、@sphior/scan(CLI/LSP) が起動時に**動的登録**する。
  * engine core はこの依存ゼロのレジストリだけを参照し、登録があればその言語を
  * AST で高精度検出、無ければ regex にフォールバックする（本番ビルド無風）。
  */

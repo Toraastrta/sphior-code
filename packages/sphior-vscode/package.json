@@ -2,7 +2,7 @@
   "name": "sphior-code",
   "displayName": "SPHIOR CODE",
   "description": "Deterministic secrets + insecure-pattern (CWE) detection with tamper-evident audit evidence. No AI, no source upload — runs locally.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "sphior",
   "license": "MIT",
   "icon": "icon.png",
