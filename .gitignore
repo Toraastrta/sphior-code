@@ -4,6 +4,7 @@ build/
 *.vsix
 *.zip
 package-lock.json
+!plugin/package-lock.json
 
 # generated at build time
 packages/sphior-scan/src/gen/

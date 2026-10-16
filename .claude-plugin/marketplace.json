@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "sphior",
   "owner": {
-    "name": "Stlare Inc.",
+    "name": "SPHIOR",
     "email": "support@sphior.com"
   },
   "description": "Security tooling from SPHIOR — deterministic scanning and audit evidence.",
@@ -16,7 +16,7 @@
       "category": "security",
       "homepage": "https://sphior.com/code",
       "author": {
-        "name": "Stlare Inc.",
+        "name": "SPHIOR",
         "email": "support@sphior.com"
       }
     }

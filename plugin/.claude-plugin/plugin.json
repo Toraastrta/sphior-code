@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
   "author": {
-    "name": "Stlare Inc.",
+    "name": "SPHIOR",
     "email": "support@sphior.com"
   },
   "homepage": "https://sphior.com/code",
