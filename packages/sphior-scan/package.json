@@ -1,6 +1,6 @@
 {
   "name": "@sphior/scan",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Deterministic source scanner — hardcoded secrets and insecure patterns (CWE) with AST/taint analysis. No AI, no network, no source upload. CLI + LSP for editors and CI.",
   "type": "module",
   "bin": {
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Toraastrta/Sphior.git",
+    "url": "git+https://github.com/Toraastrta/sphior-code.git",
     "directory": "packages/sphior-scan"
   },
   "homepage": "https://sphior.com/code",
@@ -54,5 +54,8 @@
     "esbuild": "^0.24.0",
     "typescript": "^5.5.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Toraastrta/sphior-code/issues"
+  }
 }

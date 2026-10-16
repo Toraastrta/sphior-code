@@ -11,7 +11,7 @@
       "name": "sphior-code",
       "displayName": "SPHIOR CODE",
       "source": "./plugin",
-      "description": "Deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
+      "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
       "version": "0.1.0",
       "category": "security",
       "homepage": "https://sphior.com/code",

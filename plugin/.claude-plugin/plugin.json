@@ -1,8 +1,9 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "sphior-code",
+  "displayName": "SPHIOR CODE",
   "version": "0.1.0",
-  "description": "Deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
+  "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
   "author": {
     "name": "Stlare Inc.",
     "email": "support@sphior.com"
@@ -10,6 +11,16 @@
   "homepage": "https://sphior.com/code",
   "repository": "https://github.com/Toraastrta/sphior-code",
   "license": "MIT",
-  "keywords": ["security", "sast", "sca", "secrets", "cwe", "taint-analysis", "audit"],
-  "skills": ["./skills/fix-security-findings"]
+  "keywords": [
+    "security",
+    "sast",
+    "sca",
+    "secrets",
+    "cwe",
+    "taint-analysis",
+    "audit"
+  ],
+  "skills": [
+    "./skills/fix-security-findings"
+  ]
 }
