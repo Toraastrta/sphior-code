@@ -10,6 +10,10 @@
   },
   "homepage": "https://sphior.com/code",
   "repository": "https://github.com/Toraastrta/sphior-code",
+  "documentationUrl": "https://github.com/Toraastrta/sphior-code#readme",
+  "supportUrl": "https://sphior.com/support",
+  "privacyPolicyUrl": "https://sphior.com/privacy",
+  "termsOfServiceUrl": "https://sphior.com/terms",
   "license": "MIT",
   "keywords": [
     "security",
