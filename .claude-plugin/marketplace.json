@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sphior",
+  "owner": {
+    "name": "Stlare Inc.",
+    "email": "support@sphior.com"
+  },
+  "description": "Security tooling from SPHIOR — deterministic scanning and audit evidence.",
+  "plugins": [
+    {
+      "name": "sphior-code",
+      "displayName": "SPHIOR CODE",
+      "source": "./plugin",
+      "description": "Deterministic security scanning (secrets, CWE patterns, taint analysis) that hands findings to your AI to fix. Runs locally, no account needed.",
+      "version": "0.1.0",
+      "category": "security",
+      "homepage": "https://sphior.com/code",
+      "author": {
+        "name": "Stlare Inc.",
+        "email": "support@sphior.com"
+      }
+    }
+  ]
+}
