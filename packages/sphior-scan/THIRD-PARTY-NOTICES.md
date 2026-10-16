@@ -5,7 +5,7 @@
 `@sphior/scan` ships as a bundled single file, so the following dependencies are
 compiled into `dist/`. Their license terms and copyright notices are reproduced here.
 
-## @babel/parser@7.29.9
+## @babel/parser@7.29.7
 
 License: MIT
 Source: https://github.com/babel/babel
@@ -83,7 +83,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-## vscode-languageserver-textdocument@1.0.15
+## vscode-languageserver-textdocument@1.0.12
 
 License: MIT
 Source: https://github.com/Microsoft/vscode-languageserver-node
