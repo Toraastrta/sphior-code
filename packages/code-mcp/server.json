@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.Toraastrta/sphior-code-mcp",
   "description": "Deterministic SAST/SCA findings + fix guidance for your AI agent. Runs locally, no account needed.",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "repository": {
     "url": "https://github.com/Toraastrta/sphior-code",
     "source": "github",
@@ -14,7 +14,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "sphior-code-mcp",
-      "version": "1.1.4",
+      "version": "1.1.6",
       "transport": {
         "type": "stdio"
       },

@@ -1,0 +1,66 @@
+{
+  "name": "sphior-ai-governance-mcp",
+  "version": "0.2.0",
+  "mcpName": "io.github.Toraastrta/sphior-ai-governance-mcp",
+  "description": "Official Model Context Protocol (MCP) server for SPHIOR AI Governance — let your AI agent (Claude, Cursor, Cline, Windsurf, Zed, VS Code) record its own executions as tamper-evident, independently verifiable evidence (hash-only) for ISO 42001 / EU AI Act / SOC 2.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "sphior",
+    "ai-governance",
+    "iso-42001",
+    "eu-ai-act",
+    "soc2",
+    "nist-ai-rmf",
+    "ai-audit",
+    "evidence",
+    "tamper-evident",
+    "cursor",
+    "claude",
+    "cline",
+    "windsurf",
+    "zed"
+  ],
+  "homepage": "https://sphior.com/ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Toraastrta/sphior-code.git",
+    "directory": "packages/ai-governance-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/Toraastrta/sphior-code/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "SPHIOR Security",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "sphior-ai-governance-mcp": "bin/sphior-ai-governance-mcp.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE",
+    "npm-shrinkwrap.json"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node bin/sphior-ai-governance-mcp.js",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}
