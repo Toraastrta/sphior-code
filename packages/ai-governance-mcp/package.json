@@ -1,6 +1,6 @@
 {
   "name": "sphior-ai-governance-mcp",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "mcpName": "io.github.Toraastrta/sphior-ai-governance-mcp",
   "description": "Official Model Context Protocol (MCP) server for SPHIOR AI Governance — let your AI agent (Claude, Cursor, Cline, Windsurf, Zed, VS Code) record its own executions as tamper-evident, independently verifiable evidence (hash-only) for ISO 42001 / EU AI Act / SOC 2.",
   "keywords": [

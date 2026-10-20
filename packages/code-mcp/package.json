@@ -1,6 +1,6 @@
 {
   "name": "sphior-code-mcp",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "mcpName": "io.github.Toraastrta/sphior-code-mcp",
   "description": "Official Model Context Protocol (MCP) server for SPHIOR CODE — surface security findings from your GitHub repos directly into Cursor, Claude Code, VS Code, Cline, Continue, Windsurf, Zed and any MCP-compatible AI coding assistant.",
   "keywords": [
@@ -57,8 +57,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "zod": "^3.23.8",
-    "@sphior/scan": "^0.1.5"
+    "@sphior/scan": "^0.1.6",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

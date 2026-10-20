@@ -8,7 +8,8 @@
 import { existsSync, statSync, writeFileSync } from "node:fs";
 import type { Severity } from "./types";
 import { runScan, type RunScanResult } from "./run";
-import { collectSourceFiles } from "./collect";
+import { collectSourceFiles, readSphiorignore } from "./collect";
+import { makePathExcluder, countWithoutJustification, EMPTY_CONFIG, SPHIORIGNORE_FILE } from "./suppress";
 import { canonicalJson } from "./canonical";
 import { buildFixContexts } from "./mcp/fix-context";
 
@@ -59,7 +60,7 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
   const [cmd, dir, ...rest] = argv;
 
   if (cmd !== "run" || !dir) {
-    logErr("usage: sphior-scan run <dir> [--sarif out.sarif] [--json out.json] [--fix-context out.json] [--fail-on high]");
+    logErr("usage: sphior-scan run <dir> [--sarif out.sarif] [--json out.json] [--fix-context out.json] [--suppressed out.json] [--fail-on high] [--no-ignore-file]");
     return { exitCode: 2, error: "bad_args" };
   }
 
@@ -74,12 +75,30 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
     return { exitCode: 2, error: "dir_not_found" };
   }
 
-  const files = collectSourceFiles(dir);
-  const result = runScan({ files });
+  // `.sphiorignore`: パス除外は収集時に、ルール限定の抑制は runScan 側に渡す。
+  // 「見なかった」と「見たが受け入れた」を分けて数えるため、除外はここで数える。
+  const ignoreCfg = flags["no-ignore-file"] ? EMPTY_CONFIG : readSphiorignore(dir);
+  const isExcluded = makePathExcluder(ignoreCfg);
+  let excludedCount = 0;
+  const exclude = (relPath: string) => {
+    if (!isExcluded(relPath)) return false;
+    excludedCount++;
+    return true;
+  };
+
+  for (const p of ignoreCfg.problems) {
+    logErr(`warning: ${SPHIORIGNORE_FILE}:${p.line}: ${p.reason} — ignored this line (“${p.text}”)`);
+  }
+
+  const files = collectSourceFiles(dir, { exclude });
+  const result = runScan({ files, suppress: ignoreCfg });
   const sarifJson = canonicalJson(result.sarif);
 
   if (flags.sarif) writeFile(flags.sarif, sarifJson);
+  // `--json` の形は変えない（公開 CLI の出力なので配列のまま）。抑制分は別フラグで出す
+  // （SARIF には載せない理由は run.ts の注記参照）。
   if (flags.json) writeFile(flags.json, canonicalJson(result.findings));
+  if (flags.suppressed) writeFile(flags.suppressed, canonicalJson(result.suppressed));
   // §0.6: 自前 AI を使わず、決定論 fix-context を出力 → 顧客の AI が MCP/ファイル経由で消費し修正。
   if (flags["fix-context"]) writeFile(flags["fix-context"], canonicalJson(buildFixContexts(result.findings)));
 
@@ -113,11 +132,23 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
     acc[f.severity] = (acc[f.severity] ?? 0) + 1;
     return acc;
   }, {});
+  // 「見なかった(excluded)」と「見たが受け入れた(suppressed)」を件数として明示する。
+  // どちらも 0 件扱いに丸めない（丸めると「きれいでした」が何も意味しなくなる）。
+  const scope =
+    (excludedCount > 0 ? ` ${excludedCount} files excluded` : "") +
+    (result.suppressed.length > 0 ? `${excludedCount > 0 ? "," : ""} ${result.suppressed.length} suppressed` : "");
   logErr(
     `SPHIOR CODE: ${result.findings.length} findings ` +
       `(critical=${counts.critical ?? 0} high=${counts.high ?? 0} medium=${counts.medium ?? 0} low=${counts.low ?? 0}) ` +
+      `${files.length} files scanned${scope ? ` •${scope}` : ""} ` +
       `engine=${result.engine_version} ruleset=${result.ruleset_version}`,
   );
+
+  // 理由の無い抑制は静かに溜まる。責めずに数だけ出す（後から棚卸しできるように）
+  const unexplained = countWithoutJustification(result.suppressed);
+  if (unexplained > 0) {
+    logErr(`  note: ${unexplained} of the suppressions carry no reason. Add \`: why\` so an auditor can read it later.`);
+  }
 
   // 端末実行では「次に何ができるか」を示す（SARIF を読ませるより先に用途を伝える）。
   if (ctx.isTty && !flags.sarif && !flags.json && !flags["fix-context"]) {
@@ -125,6 +156,7 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
     logErr("  --fix-context fc.json   hand findings to an AI agent to fix");
     logErr("  --sarif out.sarif       for GitHub code scanning / CI dashboards");
     logErr("  --fail-on high          exit 1 if anything at or above this severity (CI)");
+    logErr(`  ${SPHIORIGNORE_FILE}            exclude paths, or accept a rule with a reason`);
   }
 
   let exitCode = 0;

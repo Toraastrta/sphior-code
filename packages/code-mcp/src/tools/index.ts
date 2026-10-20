@@ -184,8 +184,9 @@ export const TOOLS: Tool[] = [
   {
     name: "health_check",
     description:
-      "Verify connectivity and authentication with the SPHIOR CODE API. " +
-      "Returns service version and current security summary. " +
+      "Report the server's mode and reachability. Works with no account: without " +
+      "SPHIOR_API_KEY it confirms local mode and lists which tools are usable. " +
+      "With a key it also returns the current security summary. " +
       "Use this to debug connection issues.",
     inputSchema: {
       type: "object",
@@ -261,15 +262,31 @@ export const HANDLERS: Record<string, Handler> = {
     return safe(() => api.markFalsePositive(a.findingId, a.reason));
   },
 
+  // local モードでは API を叩かない。鍵が無いのは異常ではないので、
+  // ここで 401 を返すと「鍵を確認しろ」と言われた新規ユーザーが行き止まる
+  // （requiresCloud の案内も "health_check は鍵無しで使える" と言っている）。
   health_check: async () => {
+    if (CONFIG.mode === "local") {
+      return ok({
+        status: "ok",
+        mode: "local",
+        api_reachable: false,
+        reason: "No SPHIOR_API_KEY set — running the bundled deterministic engine locally. This is a supported mode, not an error.",
+        tools_available: ["get_fix_context", "health_check"],
+        tools_requiring_account: ["list_findings", "get_finding", "get_security_summary", "resolve_finding", "mark_false_positive", "verify_evidence"],
+        get_api_key: "https://sphior.com/app?settings=api",
+        version: CONFIG.version,
+      });
+    }
     return safe(async () => {
       const { summary } = await api.getSummary();
       return {
         status: "ok",
+        mode: "cloud",
         api_reachable: true,
         repos_monitored: summary.repos_monitored,
         open_findings:   summary.total_open,
-        version:         "1.0.0",
+        version:         CONFIG.version,
       };
     });
   },

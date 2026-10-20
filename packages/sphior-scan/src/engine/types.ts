@@ -37,6 +37,21 @@ export interface FindingProof {
   evidence_ref?: string;
 }
 
+/**
+ * 抑制の記録（suppress.ts）。「見なかった」ではなく「見たうえで受け入れた」を残す。
+ * finding を消さずにこれを付け、`RunScanResult.suppressed` 側へ分ける。
+ */
+export interface FindingSuppression {
+  /** `.sphiorignore` 由来か、ソース中のインラインコメント由来か。 */
+  by: "config" | "inline";
+  /** ルールを限定した抑制か（false = その行/ファイルの全ルール）。 */
+  rule_scoped: boolean;
+  /** 書かれていれば受け入れ理由。監査で最初に読まれる 1 行。 */
+  justification?: string;
+  /** 由来の位置（例 ".sphiorignore:12" / "src/a.ts:41"）。人に戻せるようにする。 */
+  source: string;
+}
+
 export interface FindingLocation {
   path: string; // repo 相対・POSIX 区切り
   start_line: number; // 1-based
@@ -83,6 +98,11 @@ export interface CanonicalFinding {
   engines?: FindingEngine[];
   /** Proof-Based 検証の結果（付与された場合のみ）。 */
   proof?: FindingProof;
+  /**
+   * 抑制の記録（抑制された finding にのみ付く）。
+   * active な finding には付かないため、既存 finding のハッシュ/fingerprint は不変。
+   */
+  suppression?: FindingSuppression;
   /** この finding を封緘した Evidence レコードの参照（source_ref）。 */
   evidence_ref?: string;
 }

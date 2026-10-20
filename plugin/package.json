@@ -5,6 +5,6 @@
   "description": "Pins the MCP server this plugin launches, so the tree Claude Code installs is the tree that was reviewed.",
   "license": "MIT",
   "dependencies": {
-    "sphior-code-mcp": "1.1.6"
+    "sphior-code-mcp": "1.1.8"
   }
 }

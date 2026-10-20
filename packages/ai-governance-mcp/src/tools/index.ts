@@ -83,12 +83,16 @@ function requiresToken(): ToolResult | null {
   return err(
     "This tool records evidence into your SPHIOR account, so it needs an ingestion token.\n" +
     "1. Create a free account at https://sphior.com\n" +
-    "2. Open https://sphior.com/app?settings=aigov and create an ingestion token\n" +
-    "3. Set it as SPHIOR_AIGOV_TOKEN in this server's env, then restart\n" +
-    // 無料枠の件数はここに焼き込まない。ai-governance-pricing.ts の表（1 万）と
-    // ingest が実際に止める AIGOV_FREE_INGEST_CAP（10 万）が食い違っており、
-    // どちらを正とするか未決。確定するまで数値は料金ページ 1 箇所に置く。
-    "There is a free tier that needs no card — see https://sphior.com/pricing",
+    "2. Open https://sphior.com/app?settings=aiingest and create an ingestion token\n" +
+    "3. Set it as SPHIOR_AIGOV_TOKEN in this server's env, then restart\n\n" +
+    // 数字は ai-governance-pricing.ts の AIGOV_TIERS[0].maxEvents（閲覧 1 万）と
+    // AIGOV_FREE_INGEST_CAP（記録 10 万）。別物であって矛盾ではない（8beb05f の決定）。
+    // 記録を止めないのは、無料期間が証跡の空白にならないようにするため。そこが課金の
+    // 動機にもなる（上限で止まるからではなく、既に貯まった分を見るために払う）。
+    "The free tier takes no card: it keeps recording up to 100,000 events a month and\n" +
+    "shows you the latest 10,000. Nothing is dropped while you are free — paying reveals\n" +
+    "what has already been recorded, so time spent on the free tier does not become a\n" +
+    "gap in your evidence.",
   );
 }
 

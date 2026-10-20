@@ -11,7 +11,7 @@ export interface Config {
   version: string;
 }
 
-const PACKAGE_VERSION = "0.2.0";
+const PACKAGE_VERSION = "0.2.1";
 
 function readEnv(): Config {
   // トークンが無くても**起動は通す**。ここで throw すると MCP クライアントには

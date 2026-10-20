@@ -16,6 +16,29 @@ export function shannonEntropy(s: string): number {
   return h;
 }
 
+/**
+ * 「埋めてください」の値か（誤検知抑制）。
+ *
+ * 実測で `"sk_live_YOUR_KEY_HERE"`（MCP 設定の記入例）や
+ * `'sk_live_51H...hardcoded'`（修正例の Before コード）がエントロピー的には
+ * 秘密に見えてしまい、本物の検出に混ざっていた。人間向けの目印が入っている
+ * 値は秘密ではない。
+ *
+ * 本物を取りこぼす方向のリスクは無視できる（ランダムな base64 に "YOUR" 等が
+ * 並ぶ確率は 10^-6 未満）。一方で `.example` という**ファイル名**は根拠にしない
+ * ——実際にこのリポジトリの `.dev.vars.example` には本物の本番キーが入っていた。
+ * 判断材料は常に値そのもの。
+ */
+const PLACEHOLDER_MARKERS = [
+  "your", "here", "example", "sample", "placeholder", "dummy", "changeme", "change_me",
+  "hardcoded", "redacted", "insert", "replace", "todo", "fixme", "xxxx", "...", "<", ">",
+];
+
+export function looksLikePlaceholder(s: string): boolean {
+  const lower = s.toLowerCase();
+  return PLACEHOLDER_MARKERS.some((m) => lower.includes(m));
+}
+
 /** base64/hex っぽい高エントロピー文字列か（誤検知抑制の粗フィルタ）。 */
 export function looksHighEntropy(s: string, minLen = 16, minEntropy = 3.5): boolean {
   if (s.length < minLen) return false;

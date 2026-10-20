@@ -51,6 +51,26 @@ function inLineComment(text: string, lineStart: number, matchIndex: number, isPy
   return quotes % 2 === 0;
 }
 
+/**
+ * その行自体がブロックコメントの一部か（`/* …`・JSDoc の継続行 `* …`）。
+ *
+ * 実測で、「Math.random() 等 non-deterministic 関数禁止」と**禁止事項を書いた
+ * JSDoc 行**が pattern.js.weak_random として上がっていた。危険なコードを探す
+ * ルールが、危険なコードを禁止する文章に当たっている状態。
+ *
+ * ブロックコメントの範囲を text 全体で追うやり方は採らない。文字列や正規表現の
+ * 中の `/*` を誤って開始と見なすと、次の `*​/` までの**実コードを丸ごと見逃す**
+ * （検出漏れは誤検知より悪い）。判定を「マッチした行の先頭」だけに閉じる。
+ *
+ * `*` の後に空白か `/` を要求するのは、オブジェクトリテラルのジェネレータ
+ * （`*gen() { … }`）を誤ってコメント扱いしないため。
+ */
+function isBlockCommentLine(text: string, lineStart: number): boolean {
+  const lineEnd = text.indexOf("\n", lineStart);
+  const line = text.slice(lineStart, lineEnd < 0 ? text.length : lineEnd).trimStart();
+  return line.startsWith("/*") || /^\*(\s|\/|$)/.test(line);
+}
+
 export function detectPatterns(path: string, text: string, opts: PatternOptions = {}): CanonicalFinding[] {
   if (opts.ignorePaths?.some((re) => re.test(path))) return [];
   const ext = extOf(path);
@@ -99,7 +119,7 @@ export function detectPatterns(path: string, text: string, opts: PatternOptions 
     while ((m = re.exec(text)) !== null) {
       const idx = m.index;
       const pos = toPos(starts, idx);
-      if (inLineComment(text, pos.lineStart, idx, isPython)) {
+      if (inLineComment(text, pos.lineStart, idx, isPython) || isBlockCommentLine(text, pos.lineStart)) {
         if (re.lastIndex === idx) re.lastIndex++;
         continue;
       }

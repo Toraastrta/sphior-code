@@ -133,6 +133,15 @@ const SOURCE_CALL_SUFFIXES = [
   "searchParams.get", "searchParams.getAll", "formData.get", "urlParams.get",
 ];
 
+// 汚染を素通しするラッパ構築子。`new URLSearchParams(location.search)` は
+// 引数の汚染をそのままオブジェクトへ運ぶので、戻り値も汚染として扱う。
+//
+// これが無いと検出が**変数名に依存**した。SOURCE_CALL_SUFFIXES は末尾一致なので
+// `searchParams.get()` は拾えるが `params.get()` は拾えず、同じコードでも
+// 変数名を params にした途端 XSS を見逃していた（2026-10-20 実測）。
+// 値を保持して読み出す型だけに限定する（RegExp/Error 等は別の問題なので入れない）。
+const TAINT_WRAPPER_CTORS = new Set(["URLSearchParams", "URL"]);
+
 // スコープ境界（nested 関数は別スコープ）
 const SCOPE_TYPES = new Set([
   "FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression",
@@ -192,6 +201,14 @@ function exprIsTainted(node: AstNode | undefined, tainted: Set<string>): boolean
       return exprIsTainted(node.left as AstNode, tainted) || exprIsTainted(node.right as AstNode, tainted);
     case "ConditionalExpression":
       return exprIsTainted(node.consequent as AstNode, tainted) || exprIsTainted(node.alternate as AstNode, tainted);
+    case "NewExpression": {
+      // new URLSearchParams(<汚染>) / new URL(<汚染>) の戻り値は汚染。
+      // 以降 .get() / .searchParams.get() は CallExpression 側の
+      // callee.object 判定で自然に汚染として伝わる。
+      const ctor = calleeName(node);
+      if (!ctor || !TAINT_WRAPPER_CTORS.has(ctor)) return false;
+      return ((node.arguments as AstNode[] | undefined) ?? []).some((a) => exprIsTainted(a, tainted));
+    }
     case "ParenthesizedExpression":
     case "TSAsExpression":
     case "TSNonNullExpression":

@@ -9,7 +9,7 @@
 import type { CanonicalFinding } from "../types";
 import { SCHEMA_VERSION } from "../types";
 import { sha256, canonicalHash } from "../canonical";
-import { looksHighEntropy } from "./entropy";
+import { looksHighEntropy, looksLikePlaceholder } from "./entropy";
 import { SECRET_RULES, GENERIC_ASSIGNMENT, PLACEHOLDER_SECRETS, type SecretRule } from "./rules";
 
 export interface DetectOptions {
@@ -99,7 +99,7 @@ export function detectSecrets(path: string, text: string, opts: DetectOptions = 
       const g = rule.group ?? 0;
       const secret = m[g];
       if (!secret) continue;
-      if (PLACEHOLDER_SECRETS.has(secret)) continue;
+      if (PLACEHOLDER_SECRETS.has(secret) || looksLikePlaceholder(secret)) continue;
       const absStart = m.index + m[0].indexOf(secret);
       push(build(path, rule, secret, absStart, starts, false));
       if (re.lastIndex === m.index) re.lastIndex++; // ゼロ幅ガード
@@ -112,7 +112,7 @@ export function detectSecrets(path: string, text: string, opts: DetectOptions = 
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
       const secret = m[1];
-      if (!secret || PLACEHOLDER_SECRETS.has(secret)) continue;
+      if (!secret || PLACEHOLDER_SECRETS.has(secret) || looksLikePlaceholder(secret)) continue;
       if (!looksHighEntropy(secret)) continue;
       const absStart = m.index + m[0].lastIndexOf(secret);
       push(build(path, GENERIC_ASSIGNMENT, secret, absStart, starts, true));

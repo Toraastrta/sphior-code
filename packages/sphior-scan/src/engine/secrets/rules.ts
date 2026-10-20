@@ -160,7 +160,21 @@ export const SECRET_RULES: SecretRule[] = [
     provider: "PEM",
     title: "Private Key",
     severity: "critical",
-    pattern: /(-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----)/g,
+    // PEM ヘッダ**単体**では鍵ではない。実測（自社リポジトリ 1 回の走査）で
+    // secret.private_key は 6 件すべて誤検知だった:
+    //   - 日本語コメント中の「-----BEGIN RSA PRIVATE KEY----- で配布される」という説明
+    //   - `.replace(/-----BEGIN PRIVATE KEY-----/g, '')` という除去コード
+    //   - `const PEM = "-----BEGIN RSA PRIVATE KEY-----"` 等のテストベクタ（本体なし）
+    //   - ヘッダ + `btoa(...)` のようにコードで本体を作る箇所
+    // severity=critical のルールが 6/6 外れると、本物（この走査で実際に見つかった
+    // 本番 Stripe キー等）が埋まる。そこで「ヘッダの直後に base64 の鍵本体が続く」
+    // ことを先読みで要求する。
+    //
+    // 先読み（キャプチャしない）にしてある点が重要: group 1 はヘッダのままなので
+    // snippet_hash と fingerprint が変わらず、既存の真検出の delta 追跡が途切れない。
+    // 区切りは実鍵の書かれ方に合わせる — 生改行・`\n` のエスケープ列・引用符・カンマ。
+    pattern:
+      /(-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----)(?=(?:\s|\\+[nrt]|["'`,;+]){0,40}[A-Za-z0-9+/]{40,})/g,
     group: 1,
     references: REF_CWE798,
   },
