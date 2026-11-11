@@ -632,7 +632,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | `sphior-code-mcp` | 1.1.10 | `2026.10.23-24` (through `@sphior/scan` 0.1.8) |
 | Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.10`, four skills |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
-| VS Code extension, Open VSX | 0.1.4 | `2026.10.23-24` |
+| VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
 | `sphior-ai-governance-mcp` | 0.2.2 | — |
 
