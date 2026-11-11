@@ -4,9 +4,8 @@ Deterministic **secrets** + **insecure-pattern (CWE)** detection, right in your 
 
 - **No AI, no source upload.** Detection is 100% deterministic and runs locally via a bundled
   language server (`@sphior/scan`). Your code never leaves your machine.
-- **Same engine as SPHIOR's service.** The detection engine here is the one SPHIOR runs server-side,
-  so what you see in the editor matches what a connected repository reports. The extension itself
-  is entirely local — connecting a repository to SPHIOR is optional and separate.
+- **Same engine as the CLI.** The extension bundles the `@sphior/scan` language server. It is
+  entirely local — connecting a repository to SPHIOR is optional and separate.
 - **Fix with your own AI.** SPHIOR hands findings to your existing AI assistant (Copilot / Cursor /
   Claude Code) over MCP (`get_fix_context`) — SPHIOR does not generate code for you.
 
@@ -35,5 +34,6 @@ cd ../sphior-scan && npm install && npm run build
 cd ../sphior-vscode && npm install && npm run build
 ```
 
-The extension bundles the deterministic engine — the single source of truth is
-`packages/sphior-scan/src/engine` (synced into `@sphior/scan` at build time; no drift).
+The extension bundles the deterministic engine from `packages/sphior-scan/src/engine`. Each release
+bundles the ruleset current at that time; see the
+[repository README](https://github.com/Toraastrta/sphior-code#versions) for versions and the full documentation.

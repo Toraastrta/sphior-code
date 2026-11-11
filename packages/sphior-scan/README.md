@@ -31,20 +31,44 @@ sphior-scan run <dir> [options]
 
 Options:
   --sarif <file>         write SARIF 2.1.0 (GitHub code scanning, most CI tools)
-  --json <file>          write raw findings as JSON
-  --fix-context <file>   write finding context for an AI assistant to act on
-  --fail-on <severity>   exit non-zero at or above this severity
-                         (critical | high | medium | low)
+  --json <file>          write the findings as JSON
+  --fix-context <file>   write one entry per place to fix, for an AI assistant to act on
+  --suppressed <file>    write the findings accepted via .sphiorignore or inline comments
+  --fail-on <severity>   exit 1 at or above this severity
+                         (critical | high | medium | low | info)
+  --no-ignore-file       do not read .sphiorignore
 ```
 
-SARIF is written to stdout as well, so it pipes cleanly:
+With none of `--sarif`, `--json` or `--fix-context`, results go to stdout: a table in a
+terminal, SARIF when piped. A one-line summary (with engine and ruleset versions) always goes
+to stderr.
 
 ```bash
 sphior-scan run ./src --fail-on high
 ```
 
-Exit code is `0` when nothing at or above `--fail-on` was found, non-zero otherwise —
-which is what you want in CI.
+Exit codes: `0` when nothing reached `--fail-on` (or no threshold was given), `1` when something
+did, `2` when the arguments are wrong or the directory does not exist — so a typo in CI never
+passes as a clean scan.
+
+### Excluding paths and accepting findings
+
+`.sphiorignore` at the scanned root, one entry per line — `<glob> [rule_id] [# reason]`:
+
+```gitignore
+generated/**                                # no rule id: the files are not read
+test/fixtures/**   secret.*                 # rule id: scanned, then accepted with a reason
+```
+
+Inline, with any line-comment syntax:
+
+```js
+eval(template); // sphior-ignore: constant input from build time
+// sphior-ignore-next-line secret.private_key: documentation string
+```
+
+Accepted findings are left out of SARIF (GitHub code scanning ignores SARIF suppressions) and
+written to `--suppressed` with their reason.
 
 ### GitHub Actions
 
@@ -89,7 +113,8 @@ upload, no telemetry, no language model, no account. It runs correctly with netw
 ## Links
 
 - Product: <https://sphior.com/code>
-- Issues: <https://github.com/Toraastrta/Sphior/issues>
+- Source and full documentation: <https://github.com/Toraastrta/sphior-code>
+- Issues: <https://github.com/Toraastrta/sphior-code/issues>
 
 ## License
 

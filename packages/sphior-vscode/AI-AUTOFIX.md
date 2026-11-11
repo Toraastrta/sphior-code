@@ -58,15 +58,19 @@ directly (across the whole repo, not just open files).
   "mcpServers": {
     "sphior-code": {
       "command": "npx",
-      "args": ["@sphior/code-mcp"],
-      "env": { "SPHIOR_API_KEY": "sk_live_..." }
+      "args": ["-y", "sphior-code-mcp"]
     }
   }
 }
 ```
 
-Tools the agent gets: `list_findings`, `get_finding`, **`get_fix_context`** (deterministic *how to
-fix*, no source sent), **`verify_evidence`** (tamper-evident audit chain).
+No account or key is needed: the server scans the workspace locally and gives the agent
+**`get_fix_context`** (deterministic *how to fix*, no source sent) and `health_check`.
+Claude Code users can run `claude mcp add sphior-code -- npx -y sphior-code-mcp` instead.
+
+With `SPHIOR_API_KEY` set (optional), the agent also gets `list_findings`, `get_finding`,
+`get_security_summary`, `resolve_finding`, `mark_false_positive` and **`verify_evidence`** for the
+repositories you connected to SPHIOR on GitHub.
 
 ---
 

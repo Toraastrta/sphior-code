@@ -3,8 +3,8 @@
 Official **Model Context Protocol (MCP)** server for **SPHIOR CODE** — find security issues in your code and let your own AI assistant fix them, inside any MCP-compatible client.
 
 **No account needed to start.** With no API key set, the server scans your local workspace with the
-bundled deterministic engine and hands the findings to your AI agent. Add an API key later if you
-want tamper-evident evidence, history and GRC integrations.
+bundled deterministic engine and hands the findings to your AI agent. Add an API key later to reach the
+repositories you connected to SPHIOR on GitHub, with their history and verifiable scan records.
 
 [![npm version](https://img.shields.io/npm/v/sphior-code-mcp.svg)](https://www.npmjs.com/package/sphior-code-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -57,8 +57,8 @@ sphior-code-mcp
 | Setup | nothing — just run it | set `SPHIOR_API_KEY` |
 | What it scans | your local workspace | repositories connected to SPHIOR |
 | Tools available | `get_fix_context`, `health_check` | all 8 tools |
-| Source code leaves your machine | **never** | **never** |
-| Tamper-evident evidence / history / GRC push | — | ✅ |
+| This server sends your source code | **never** | **never** |
+| Scan history and verifiable scan records | — | ✅ |
 
 In **local** mode the server runs the same deterministic engine that powers the editor extensions
 (secrets + CWE patterns + taint analysis across 14 languages, parsed with real grammars) against the
@@ -69,8 +69,8 @@ Cloud-only tools return a clear message explaining what they need, rather than f
 
 ## Configuration
 
-Nothing is required to start. To unlock cloud features, set an API key from
-[sphior.com/account/api](https://sphior.com/account/api):
+Nothing is required to start. To unlock cloud features, create an API key under
+**Settings → API** at [sphior.com/app](https://sphior.com/app?settings=api):
 
 ```bash
 export SPHIOR_API_KEY=sk_live_xxxxxxxxxxxx
@@ -83,7 +83,7 @@ export SPHIOR_API_KEY=sk_live_xxxxxxxxxxxx
 | `SPHIOR_API_KEY`  | No | — | Bearer token. Omit for local mode; set it for cloud mode |
 | `SPHIOR_WORKSPACE` | No | current directory | Directory to scan in local mode |
 | `SPHIOR_API_BASE` | No | `https://sphior.com/api/v1` | Override for self-hosted / regional deployments |
-| `SPHIOR_TIMEOUT`  | No | `30000` | Request timeout in ms (1000–300000) |
+| `SPHIOR_TIMEOUT`  | No | `30000` | Local scan and request timeout in ms (1000–300000) |
 | `SPHIOR_DEBUG`    | No | `false` | Enable verbose logging to stderr |
 
 ## Example config (Cursor / Claude Code / VS Code style)
@@ -191,5 +191,6 @@ MIT © SPHIOR Security
 
 - 🌐 [SPHIOR Code](https://sphior.com/code)
 - 📖 [API Reference](https://sphior.com/docs/api)
-- 🐛 [Report issues](https://github.com/sphior/code-mcp/issues)
-- 🔑 [Get an API key](https://sphior.com/account/api)
+- 📚 [Full documentation](https://github.com/Toraastrta/sphior-code#ai-coding-assistants-mcp)
+- 🐛 [Report issues](https://github.com/Toraastrta/sphior-code/issues)
+- 🔑 [Get an API key](https://sphior.com/app?settings=api)

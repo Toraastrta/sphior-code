@@ -5,8 +5,9 @@ Deterministic **secrets** + insecure-pattern (**CWE**) detection for all JetBrai
 
 - **No AI, no source upload.** Detection is 100% deterministic and runs locally through a bundled
   language server (`@sphior/scan`). Your code never leaves your machine.
-- **Same engine as CI + VS Code.** The single source of truth is `packages/sphior-scan/src/engine`
-  (synced into `@sphior/scan` at build time; no drift).
+- **Same engine as the CLI and VS Code.** The engine lives in `packages/sphior-scan/src/engine`
+  and is bundled at build time. Each release bundles the ruleset current at that time; the
+  version is listed in the [repository README](https://github.com/Toraastrta/sphior-code#versions).
 - **Fix with your own AI.** Findings are handed to your existing AI assistant over MCP —
   SPHIOR does not generate code for you.
 
@@ -17,8 +18,9 @@ Deterministic **secrets** + insecure-pattern (**CWE**) detection for all JetBrai
 
 ## Languages
 
-JavaScript, TypeScript (+ JSX/TSX), Python — matched by file name pattern, so it works in
-every JetBrains IDE regardless of bundled language support.
+JavaScript, TypeScript (+ JSX/TSX), Python, Go, PHP, Ruby, Java, C#, Rust, Kotlin, C, C++, Scala,
+Swift — matched by file name pattern, so it works in every JetBrains IDE from 2024.2 regardless of
+bundled language support.
 
 ## Let your AI fix them
 
@@ -27,4 +29,4 @@ Copilot** can fix it directly from the diagnostic. To make your agent fix SPHIOR
 **automatically**, see [../sphior-vscode/AI-AUTOFIX.md](../sphior-vscode/AI-AUTOFIX.md)
 (the agent-rule snippets and MCP setup apply to any IDE).
 
-See [BUILD.md](./BUILD.md) for building and publishing to the JetBrains Marketplace.
+To build it yourself, see [Building from source](https://github.com/Toraastrta/sphior-code#repository-layout-and-building-from-source).
