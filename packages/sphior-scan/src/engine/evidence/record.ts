@@ -9,6 +9,7 @@
 import type { CanonicalFinding, Severity } from "../types";
 import { canonicalHash } from "../canonical";
 import { merkleRoot, countBySeverity } from "./merkle";
+import type { ScanScope } from "../scope";
 
 export interface EvidenceRecordInput {
   repo: string;
@@ -22,6 +23,15 @@ export interface EvidenceRecordInput {
   actor: string;
   /** 直前レコードの record_hash（初回は null）。 */
   prev_record_hash: string | null;
+  /**
+   * 検査範囲と除外理由（`scope.ts`）。**ハッシュ封筒の中に入る**ので、
+   * 「何を見て何を見なかったか」も findings と同じ強度で改竄検知できる。
+   *
+   * 後方互換: 省略時は `stabilize` が undefined キーを落とすため、
+   * scope を持たない既存レコードの record_hash は**一切変わらない**
+   * （record.test.ts で既知ハッシュを固定して守っている）。
+   */
+  scope?: ScanScope;
 }
 
 export interface EvidenceRecord extends EvidenceRecordInput {
@@ -43,6 +53,8 @@ export function buildEvidenceRecord(input: EvidenceRecordInput, findings: Canoni
     scanned_at: input.scanned_at,
     actor: input.actor,
     prev_record_hash: input.prev_record_hash,
+    // 未指定なら undefined のまま body に残り canonicalJson が落とす（既存ハッシュ不変）
+    scope: input.scope,
     findings_merkle_root: merkleRoot(findings),
     finding_count: findings.length,
     finding_count_by_severity: countBySeverity(findings),

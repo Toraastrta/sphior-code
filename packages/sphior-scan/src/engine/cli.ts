@@ -39,17 +39,48 @@ export interface CliResult {
   error?: string;
 }
 
-function parseFlags(rest: string[]): Record<string, string> {
+/** 値を取るフラグ。値が無ければ引数不正。 */
+const VALUE_FLAGS = new Set(["sarif", "json", "fix-context", "suppressed", "fail-on"]);
+/** 値を取らないフラグ。 */
+const BOOLEAN_FLAGS = new Set(["no-ignore-file"]);
+
+type ParsedFlags = { ok: true; flags: Record<string, string> } | { ok: false; error: string };
+
+/**
+ * フラグを厳密に解釈する。
+ *
+ * 以前は未知のフラグ・`--fail-on` の不正値（`bogus`・値なし）を黙って捨てていた。
+ * CI で `--fail-on` を打ち間違えると閾値が無効になり、重大な所見があっても
+ * exit 0 で「合格」になる（ゲートが黙って外れる）。これは「0 件走査を緑にしない」
+ * （下の dir_not_found）と同じ種類の事故なので、解釈できない引数は exit 2 にする。
+ *
+ * 受け付ける形: `--flag value` と `--flag=value`。`--fail-on` の値は大文字小文字を問わない
+ * （`HIGH` は意図が明らかなので正規化して受ける）。
+ */
+function parseFlags(rest: string[]): ParsedFlags {
   const flags: Record<string, string> = {};
   for (let i = 0; i < rest.length; i++) {
     const a = rest[i];
-    if (a.startsWith("--")) {
-      const key = a.slice(2);
-      const val = rest[i + 1] && !rest[i + 1].startsWith("--") ? rest[++i] : "true";
-      flags[key] = val;
+    if (!a.startsWith("--")) return { ok: false, error: `unexpected argument: ${a}` };
+    const eq = a.indexOf("=");
+    const key = eq >= 0 ? a.slice(2, eq) : a.slice(2);
+    if (BOOLEAN_FLAGS.has(key)) {
+      if (eq >= 0) return { ok: false, error: `--${key} takes no value` };
+      flags[key] = "true";
+      continue;
     }
+    if (!VALUE_FLAGS.has(key)) return { ok: false, error: `unknown option: --${key}` };
+    let val: string | undefined;
+    if (eq >= 0) val = a.slice(eq + 1);
+    else if (rest[i + 1] !== undefined && !rest[i + 1].startsWith("--")) val = rest[++i];
+    if (!val) return { ok: false, error: `--${key} needs a value` };
+    if (key === "fail-on") {
+      val = val.toLowerCase();
+      if (!(val in SEV_ORDER)) return { ok: false, error: `--fail-on must be one of: critical, high, medium, low, info (got "${val}")` };
+    }
+    flags[key] = val;
   }
-  return flags;
+  return { ok: true, flags };
 }
 
 /** テスト可能な CLI 本体。exitCode を返す（process.exit は bin 側）。 */
@@ -64,7 +95,14 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
     return { exitCode: 2, error: "bad_args" };
   }
 
-  const flags = parseFlags(rest);
+  const parsed = parseFlags(rest);
+  if (!parsed.ok) {
+    // 解釈できない引数で走査を進めると、意図した閾値・出力が効かないまま結果が出る。
+    logErr(`error: ${parsed.error}`);
+    logErr("  Nothing was scanned. Fix the command so the result means what you intended.");
+    return { exitCode: 2, error: "bad_args" };
+  }
+  const flags = parsed.flags;
 
   // 走査対象が存在しないのに「0 findings・exit 0」を返すと、CI のパス打ち間違いが
   // 永久に緑になる。「0 件検出」と「0 件走査」は別物として扱う
@@ -147,7 +185,7 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
   // 理由の無い抑制は静かに溜まる。責めずに数だけ出す（後から棚卸しできるように）
   const unexplained = countWithoutJustification(result.suppressed);
   if (unexplained > 0) {
-    logErr(`  note: ${unexplained} of the suppressions carry no reason. Add \`: why\` so an auditor can read it later.`);
+    logErr(`  note: ${unexplained} of the suppressions carry no reason. Add \`: why\` to the comment, or \`# why\` to the ${SPHIORIGNORE_FILE} line, so an auditor can read it later.`);
   }
 
   // 端末実行では「次に何ができるか」を示す（SARIF を読ませるより先に用途を伝える）。
@@ -160,8 +198,9 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
   }
 
   let exitCode = 0;
+  // parseFlags で妥当な重大度に正規化済み（不正値はここまで来ない）。
   const failOn = flags["fail-on"] as Severity | undefined;
-  if (failOn && SEV_ORDER[failOn] !== undefined) {
+  if (failOn) {
     const threshold = SEV_ORDER[failOn];
     if (result.findings.some((f) => SEV_ORDER[f.severity] >= threshold)) exitCode = 1;
   }

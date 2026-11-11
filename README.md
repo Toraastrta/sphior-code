@@ -28,7 +28,7 @@ the same findings.
 - [VS Code](#vs-code)
 - [JetBrains IDEs](#jetbrains-ides)
 - [AI coding assistants (MCP)](#ai-coding-assistants-mcp)
-- [Claude Code plugin](#claude-code-plugin)
+- [Agent skills](#agent-skills) — Claude Code, Codex, Cursor, GitHub Copilot, claude.ai
 - [Evidence records](#evidence-records)
 - [Privacy and data boundary](#privacy-and-data-boundary)
 - [What it does not do](#what-it-does-not-do)
@@ -58,7 +58,7 @@ In a terminal you get a table sorted by severity:
   high     util.py:5  TLS verification disabled (verify=False) (CWE-295)
   medium   util.py:2  Weak hash algorithm (CWE-327)
 
-SPHIOR CODE: 9 findings (critical=3 high=5 medium=1 low=0) 3 files scanned engine=0.1.0 ruleset=2026.10.20-23
+SPHIOR CODE: 9 findings (critical=3 high=5 medium=1 low=0) 3 files scanned engine=0.1.0 ruleset=2026.10.23-24
 ```
 
 Piped, the same command prints SARIF instead, so `npx @sphior/scan run . | jq` works.
@@ -84,13 +84,14 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **VS Code** (and Cursor, Windsurf, VSCodium) | [`sphior.sphior-code`](https://marketplace.visualstudio.com/items?itemName=sphior.sphior-code) · [Open VSX](https://open-vsx.org/extension/sphior/sphior-code) | Findings as you type. A quick fix that hands the finding to your AI. |
 | **JetBrains IDEs** | [plugin 33696](https://plugins.jetbrains.com/plugin/33696-sphior-code) | The same in IntelliJ IDEA, PyCharm, WebStorm, GoLand, Rider, PhpStorm, RubyMine, CLion and others. |
 | **AI coding assistants** | [`sphior-code-mcp`](https://www.npmjs.com/package/sphior-code-mcp) | An MCP server. Your assistant scans the workspace and receives the location and the remediation for each finding. |
-| **Claude Code** | [plugin in this repository](#claude-code-plugin) | The MCP server plus a skill that runs the scan → fix → re-scan loop. |
+| **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
+| **Claude Code** | [plugin in this repository](#claude-code) | The MCP server and all four skills in one install. |
 
 ---
 
 ## What it detects
 
-Ruleset `2026.10.20-23`, the version shipped in `@sphior/scan` 0.1.6 and `sphior-code-mcp` 1.1.8.
+Ruleset `2026.10.23-24`, the version shipped in `@sphior/scan` 0.1.7 and later, `sphior-code-mcp` 1.1.9 and the VS Code extension 0.1.3.
 
 ### 1. Hard-coded secrets — 36 rules
 
@@ -107,7 +108,7 @@ Provider-specific signatures plus one generic high-entropy rule.
 Secrets are searched in **every text file**, not only source files. `.env*`, `.github/` and
 `*.example` files are deliberately scanned, because real keys end up there.
 
-### 2. Insecure code patterns — 83 rules
+### 2. Insecure code patterns — 84 rules
 
 Rules for constructs that are dangerous on their own, each mapped to a CWE and an OWASP Top 10
 (2021) category.
@@ -116,7 +117,7 @@ Rules for constructs that are dangerous on their own, each mapped to a CWE and a
 |---|---:|---|---:|
 | Python | 19 | Ruby | 6 |
 | Java | 12 | Go | 5 |
-| JavaScript / TypeScript | 11 | C# | 4 |
+| JavaScript / TypeScript | 12 | C# | 4 |
 | PHP | 8 | Kotlin | 4 |
 | C / C++ | 3 | Rust | 3 |
 | SQL | 3 | Swift | 3 |
@@ -225,6 +226,10 @@ sphior-scan run <dir> [options]
 | `--fail-on <severity>` | Exit 1 if any finding is at or above `critical`, `high`, `medium`, `low` or `info`. |
 | `--no-ignore-file` | Ignore `.sphiorignore` for this run. |
 
+Options accept `--option value` and `--option=value`; `--fail-on` is case-insensitive. From 0.1.8 a
+mistyped option or threshold stops the run with exit `2` and says why, so a typo in CI can never
+quietly turn the gate off.
+
 **Output.** With none of `--sarif`, `--json` or `--fix-context`, results go to standard output:
 a table when it is a terminal, SARIF when it is piped or redirected. A one-line summary with the
 engine and ruleset versions is always written to standard error.
@@ -235,7 +240,7 @@ engine and ruleset versions is always written to standard error.
 |---|---|
 | `0` | Scan completed, and nothing reached the `--fail-on` threshold (or no threshold was given). |
 | `1` | At least one finding at or above `--fail-on`. |
-| `2` | Bad arguments, or the directory does not exist. Nothing was scanned, so this is never reported as a clean result. |
+| `2` | Nothing was scanned: the directory does not exist, or an option is unknown or has an invalid value. Never reported as a clean result. |
 
 A directory with no scannable files is reported as such, with a warning, instead of as
 "0 findings".
@@ -266,14 +271,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx -y @sphior/scan@0.1.6 run . --sarif sphior.sarif --fail-on high
+      - run: npx -y @sphior/scan@0.1.8 run . --sarif sphior.sarif --fail-on high
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: sphior.sarif
 ```
 
-- Pin the version (`@sphior/scan@0.1.6`) so a ruleset update never changes results without a
+- Pin the version (`@sphior/scan@0.1.8`) so a ruleset update never changes results without a
   commit on your side.
 - Each SARIF rule carries `security-severity` (9.5 / 8.0 / 5.5 / 3.0 / 1.0 for critical → info)
   and CWE / OWASP tags, and each result a `sphiorFingerprint`, so GitHub ranks alerts and tracks
@@ -452,28 +457,69 @@ silently. The local scan never contacts SPHIOR's servers in either mode.
 
 ---
 
-## Claude Code plugin
+## Agent skills
 
-This repository is also a Claude Code plugin marketplace.
+Four skills teach a coding agent how to work with SPHIOR CODE — not just how to run it, but what
+to do with the result. They use the open `SKILL.md` format, so the same files work in Claude
+Code, Codex, Cursor, GitHub Copilot and claude.ai. They live in
+[`plugin/skills/`](plugin/skills).
+
+| Skill | Starts when you say | What the agent does |
+|---|---|---|
+| [**fix-security-findings**](plugin/skills/fix-security-findings/SKILL.md) | *"scan this project"*, *"fix the security issues"*, *"any hard-coded keys?"* | Scans, opens each location, applies the remediation (one edit for everything in `also`), **scans again to confirm**, runs your tests, and tells you which credentials must be rotated |
+| [**triage-security-findings**](plugin/skills/triage-security-findings/SKILL.md) | *"these are false positives"*, *"this is test data"*, *"too many findings"* | Reads each finding in context and sorts it into real / test data / false positive / not our code. Fixes the real ones; records the others in the narrowest form, always with a rule id and a reason; re-scans to prove nothing else disappeared; gives you a table to review |
+| [**setup-security-ci**](plugin/skills/setup-security-ci/SKILL.md) | *"add security scanning to CI"*, *"block merges with secrets"* | Measures the current state, agrees a `--fail-on` threshold with you, pins the scanner version, and writes the GitHub Actions, GitLab CI or other CI step — with SARIF upload where your repository supports it |
+| [**pre-release-security-check**](plugin/skills/pre-release-security-check/SKILL.md) | *"is this ready to ship?"*, *"check before release"* | Runs one scan against fixed criteria — no exposed secrets, no open critical or high — and reports **Ready** or **Not ready** with the evidence and the versions used |
+
+What every skill is told: never make a finding disappear without fixing it or recording a reason,
+never print or commit a secret, never present a clean scan as more than it is, and leave the
+final decision to a human before merge.
+
+The skills get findings from the [MCP server](#ai-coding-assistants-mcp) when it is installed,
+otherwise from the [command line](#command-line). Neither needs an account.
+
+### Claude Code
+
+This repository is a Claude Code plugin marketplace. One install adds the MCP server (pinned to
+`sphior-code-mcp@1.1.9`, so it does not change under you) and all four skills:
 
 ```
 /plugin marketplace add Toraastrta/sphior-code
 /plugin install sphior-code@sphior
 ```
 
-The plugin adds:
+### Codex, Cursor, GitHub Copilot
 
-- the `sphior-code` MCP server, pinned to `sphior-code-mcp@1.1.8` so it does not change under you;
-- the **fix-security-findings** skill. It starts when you ask things like *"scan this project"*,
-  *"fix the security issues"*, *"any hard-coded keys?"*, or before a release, and runs a fixed loop:
-  1. call `get_fix_context`;
-  2. open each location and read the real code;
-  3. apply the remediation steps, satisfying everything listed in `also` with one edit;
-  4. **re-run the scan to confirm the findings are gone**;
-  5. run the project's own tests.
+Copy the skill folders into the directory your agent reads:
 
-  It is told never to silence a finding with an ignore comment, never to narrow a rule or delete a
-  test, never to print a secret, and to tell you when an exposed credential has to be rotated.
+| Agent | In one repository | For all your projects |
+|---|---|---|
+| **Codex** | `.agents/skills/` | `~/.agents/skills/` |
+| **Cursor** | `.agents/skills/` or `.cursor/skills/` | `~/.agents/skills/` or `~/.cursor/skills/` |
+| **GitHub Copilot** (VS Code agent mode, Copilot CLI) | `.agents/skills/` or `.github/skills/` | — |
+
+All three read `.agents/skills/`, so one copy in the repository covers them all:
+
+```bash
+git clone --depth 1 https://github.com/Toraastrta/sphior-code.git /tmp/sphior-code
+mkdir -p .agents/skills
+cp -R /tmp/sphior-code/plugin/skills/* .agents/skills/
+```
+
+Restart the agent if a skill does not appear. In Codex you can also call one explicitly, for
+example `$pre-release-security-check`. For the MCP server, see
+[Set it up](#set-it-up); without it, the skills run the command line through `npx`.
+
+### claude.ai and Claude Desktop
+
+1. Download the skill ZIPs from the
+   [latest release](https://github.com/Toraastrta/sphior-code/releases/latest).
+2. In **Settings → Capabilities**, make sure code execution is on, then under **Skills** choose
+   **Upload skill** and upload each ZIP.
+
+claude.ai cannot see your local files, so attach the scan output instead: run
+`npx @sphior/scan run . --fix-context sphior-fix.json` (or `--json`) on your machine and add the
+file to the conversation. The skill works from it.
 
 ---
 
@@ -486,7 +532,8 @@ trusting whoever produced it:
 | | |
 |---|---|
 | `../canonical.ts` | Canonical JSON (RFC 8785) so the same data always hashes the same |
-| `record.ts` | One scan as one record: repository, branch, commit, engine and ruleset versions, time, finding counts, the Merkle root of the findings, and the hash of the previous record |
+| `record.ts` | One scan as one record: repository, branch, commit, engine and ruleset versions, time, finding counts, scan scope, the Merkle root of the findings, and the hash of the previous record |
+| `../scope.ts` | What a scan covered and what it did not: files considered and analysed, files left out by reason, languages, and the limits applied. Recorded inside the hashed record, so the gaps are as verifiable as the findings |
 | `merkle.ts` | Merkle root over finding fingerprints, in sorted order |
 | `chain.ts` | Recompute each record hash and check the link to the previous record |
 | `pack.ts` | Evidence pack: per-file SHA-256 and a manifest hash, and the check that verifies it |
@@ -581,17 +628,18 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 
 | Package | Version | Ruleset bundled |
 |---|---|---|
-| `@sphior/scan` (CLI, language server) | 0.1.6 | `2026.10.20-23` |
-| `sphior-code-mcp` | 1.1.8 | `2026.10.20-23` (through `@sphior/scan` 0.1.6) |
-| Claude Code plugin `sphior-code` | 0.1.0 | pins `sphior-code-mcp@1.1.8` |
-| VS Code extension `sphior.sphior-code` | 0.1.2 | `2026.07.12-22` |
+| `@sphior/scan` (CLI, language server) | 0.1.8 | `2026.10.23-24` |
+| `sphior-code-mcp` | 1.1.9 | `2026.10.23-24` (through `@sphior/scan` 0.1.7) |
+| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.9`, four skills |
+| VS Code extension, Visual Studio Marketplace | 0.1.3 | `2026.10.23-24` |
+| VS Code extension, Open VSX | 0.1.2 | `2026.07.12-22` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
 | `sphior-ai-governance-mcp` | 0.2.2 | — |
 
-The editor extensions run the same engine code but are released on their own schedule, so they
-currently bundle an earlier ruleset than the CLI. Every run prints its engine and ruleset versions,
-and every SARIF file records them, so a result can always be traced to the exact rules that
-produced it.
+All surfaces run the same engine code, but each is released on its own schedule, so a surface
+can bundle an earlier ruleset than the CLI for a while. Every run prints its engine and ruleset
+versions, and every SARIF file records them, so a result can always be traced to the exact rules
+that produced it.
 
 ---
 

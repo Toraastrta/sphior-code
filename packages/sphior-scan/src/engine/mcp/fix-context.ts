@@ -93,9 +93,11 @@ function remediationStepsFor(f: CanonicalFinding): string[] {
     case "sast_secret":
       return [
         `Remove the credential from ${path} (line ${f.location.start_line}).`,
-        `Revoke/rotate the exposed ${f.provider ?? "credential"} immediately in its provider console.`,
+        // provider が "Generic" 等の分類名のときに「the exposed Generic」と読めない文にしない
+        `Revoke/rotate the exposed ${f.provider && f.provider !== "Generic" ? `${f.provider} credential` : "credential"} immediately in the issuing service's console.`,
         "Load the value from a secret manager or environment variable instead of source.",
-        "Purge the secret from git history if it was committed (e.g. git filter-repo / BFG).",
+        // 履歴の書き換えは破壊的・チーム全体の判断。AI エージェントに自動実行させない文面にする
+        "If it was committed, it stays in git history: rotating it is what makes it safe. Rewriting history (git filter-repo / BFG) is a separate decision for the repository owner — do not do it as part of this fix.",
         "Re-scan to confirm no other copies remain.",
       ];
     case "sca":

@@ -2,6 +2,18 @@
 
 All notable changes to the **SPHIOR CODE** VS Code extension are documented here.
 
+## [0.1.3] — 2026-11-12
+
+- Ships the current rule set, `2026.10.23-24`, replacing `2026.07.12-22`. Editor
+  findings now match `@sphior/scan` 0.1.7 on the command line.
+- New since 0.1.2, among others:
+  - Weak ciphers in JavaScript/TypeScript (DES/3DES, RC2/RC4, Blowfish, IDEA, ECB).
+  - Path traversal through `fs` functions imported by name, such as
+    `import { readFileSync } from "node:fs"`.
+  - XSS through `res.send` and `URLSearchParams` flows.
+  - Inline acceptance with `// sphior-ignore` and `// sphior-ignore-next-line`.
+  - Fewer false positives on private-key headers.
+
 ## [0.1.2] — 2026-10-16
 
 - The extension pointed at a private repository, so the "Repository" link on the

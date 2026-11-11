@@ -265,7 +265,56 @@ function collectTainted(scope: AstNode, seed: Iterable<string>): Set<string> {
 }
 
 /** スコープ内の sink を検出（tainted set を受け hit を返す。intra/inter で共有）。 */
-function scanSinks(scope: AstNode, tainted: Set<string>): SinkHit[] {
+/** `fs` / `node:fs` / `fs/promises` 系のモジュール指定か。 */
+function isFsModule(spec: unknown): boolean {
+  if (typeof spec !== "string") return false;
+  const m = spec.replace(/^node:/, "");
+  return m === "fs" || m === "fs/promises";
+}
+
+/**
+ * fs から**実際に import された**ローカル名のうち、FS_METHODS に当たるものを集める。
+ *
+ * 2026-10-23: 自己完結コーパスが検出欠落として挙げた。従来 path traversal の sink は
+ * `fs.readFileSync(...)` の**メンバ式のみ**を見ており、
+ * `import { readFileSync } from "node:fs"` の裸呼びが素通りしていた。
+ * **ESM の名前付き import は現代の標準形**なので、この書き方が全て検査外だった。
+ *
+ * 0-FP の作り: 裸の名前を無条件に sink にすると、たまたま `readFileSync` という名の
+ * ローカル関数で誤検知する。**import 由来であることを確認した名前だけ**を sink にする。
+ * 別名 import（`as rf`）と CJS 分割代入にも対応する。
+ */
+function collectFsImportedNames(ast: unknown): Set<string> {
+  const names = new Set<string>();
+  walk(ast, (n) => {
+    // ESM: import { readFileSync, readFile as rf } from "node:fs"
+    if (n.type === "ImportDeclaration" && isFsModule((n.source as AstNode | undefined)?.value)) {
+      for (const spec of (n.specifiers as AstNode[] | undefined) ?? []) {
+        if (spec.type !== "ImportSpecifier") continue; // default/namespace は memberPath 側で拾う
+        const imported = (spec.imported as AstNode | undefined)?.name;
+        const local = (spec.local as AstNode | undefined)?.name;
+        if (typeof imported === "string" && FS_METHODS.has(imported) && typeof local === "string") names.add(local);
+      }
+      return;
+    }
+    // CJS: const { readFileSync, readFile: rf } = require("fs")
+    if (n.type === "VariableDeclarator") {
+      const init = n.init as AstNode | undefined;
+      const id = n.id as AstNode | undefined;
+      if (!init || !id || id.type !== "ObjectPattern") return;
+      if (calleeName(init) !== "require") return;
+      if (!isFsModule((init.arguments as AstNode[] | undefined)?.[0]?.value)) return;
+      for (const prop of (id.properties as AstNode[] | undefined) ?? []) {
+        const key = (prop.key as AstNode | undefined)?.name;
+        const val = (prop.value as AstNode | undefined)?.name;
+        if (typeof key === "string" && FS_METHODS.has(key) && typeof val === "string") names.add(val);
+      }
+    }
+  });
+  return names;
+}
+
+function scanSinks(scope: AstNode, tainted: Set<string>, fsNames: ReadonlySet<string> = new Set()): SinkHit[] {
   const hits: SinkHit[] = [];
   const hit = (ruleId: string, node: AstNode): void => { hits.push({ ruleId, node }); };
   walkScope(scope, (n) => {
@@ -285,6 +334,9 @@ function scanSinks(scope: AstNode, tainted: Set<string>): SinkHit[] {
         (!!method && HTTP_METHODS.has(method) && !!objPath && HTTP_CLIENT_OBJECTS.has(objPath) && exprIsTainted(arg0, tainted))
       ) hit("taint.js.ssrf", n);
       else if (!!method && FS_METHODS.has(method) && !!objPath && (objPath === "fs" || objPath === "fs.promises" || objPath === "fsp") && exprIsTainted(arg0, tainted)) hit("taint.js.path_traversal", n);
+      // 裸呼び: import { readFileSync } from "node:fs" の形。**import 由来と確認済みの
+      // 名前だけ**を sink にする（同名のローカル関数で誤検知しないため）。
+      else if (!!idName && fsNames.has(idName) && exprIsTainted(arg0, tainted)) hit("taint.js.path_traversal", n);
       else if (REDIRECT_CALLS.has(memberPath(callee) ?? "") && exprIsTainted(arg0, tainted)) hit("taint.js.open_redirect", n);
       // 反射型 XSS: res.send/write/end に汚染をそのまま返す（Express 等）
       else if (!!method && ["send", "write", "end"].includes(method) && !!objPath && (objPath === "res" || objPath === "response") && exprIsTainted(arg0, tainted)) hit("taint.js.xss", n);
@@ -386,6 +438,9 @@ export function detectTaintFromAst(ast: unknown, path: string, text: string): Ca
   // inter-procedural（multi-level）: 各ローカル関数の「param i が sink へ到達するか」を
   // call graph 上で fixpoint 伝播して要約する。直接 sink に加え、汚染引数で別のローカル
   // 関数を呼び、その callee の param-sink に到達する経路も引き継ぐ（多段フロー）。
+  // fs から import された名前はファイル単位で 1 度だけ集める（裸呼び sink の判定用）
+  const fsNames = collectFsImportedNames(ast);
+
   const functions = collectLocalFunctions(ast);
   const paramSinks = new Map<string, Map<number, SinkHit[]>>();
   const hitKey = (h: SinkHit): string => `${h.ruleId}@${(h.node.start as number | undefined) ?? -1}`;
@@ -397,7 +452,7 @@ export function detectTaintFromAst(ast: unknown, path: string, text: string): Ca
       fn.params.forEach((p, i) => {
         if (!p) return;
         const tainted = collectTainted(fn.scope, [p]);
-        const hits: SinkHit[] = scanSinks(fn.scope, tainted); // 直接 sink
+        const hits: SinkHit[] = scanSinks(fn.scope, tainted, fsNames); // 直接 sink
         // 多段: 汚染引数で別のローカル関数を呼ぶ → callee の param-sink を引き継ぐ
         walkScope(fn.scope, (n) => {
           if (n.type !== "CallExpression") return;
@@ -429,7 +484,7 @@ export function detectTaintFromAst(ast: unknown, path: string, text: string): Ca
   for (const scope of scopes) {
     const tainted = collectTainted(scope, []);
     // intra-proc sink
-    for (const h of scanSinks(scope, tainted)) addFinding(h.ruleId, h.node);
+    for (const h of scanSinks(scope, tainted, fsNames)) addFinding(h.ruleId, h.node);
     // inter-proc: ローカル関数を汚染引数で呼ぶ → callee 内の param-sink を報告
     walkScope(scope, (n) => {
       if (n.type !== "CallExpression") return;

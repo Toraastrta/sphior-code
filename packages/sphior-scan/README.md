@@ -48,8 +48,9 @@ sphior-scan run ./src --fail-on high
 ```
 
 Exit codes: `0` when nothing reached `--fail-on` (or no threshold was given), `1` when something
-did, `2` when the arguments are wrong or the directory does not exist — so a typo in CI never
-passes as a clean scan.
+did, `2` when nothing was scanned — the directory does not exist, or an option is unknown or has
+an invalid value — so a typo in CI never passes as a clean scan. Options accept `--option value`
+and `--option=value`.
 
 ### Excluding paths and accepting findings
 

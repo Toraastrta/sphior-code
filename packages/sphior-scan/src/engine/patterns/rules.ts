@@ -100,6 +100,24 @@ export const PATTERN_RULES: PatternRule[] = [
     exts: JS,
     pattern: /createHash\s*\(\s*['"`](?:md5|sha1)['"`]\s*\)/gi,
   },
+  {
+    // 2026-10-23: 自己完結コーパス（measure-gate/sast-corpus.ts）が検出欠落として
+    // 検出した。pattern.go.weak_cipher と pattern.java.weak_cipher は存在するのに
+    // **JS/TS 版が無く**、同じ弱点が Go/Java では検出され Node では無検出だった。
+    //
+    // 0-FP の作り: アルゴリズム名を**引用符の直後に固定**する。これが無いと
+    // "description" のような語が `des` に当たる。安全な算法（aes-256-gcm /
+    // aes-256-cbc 等）に当たらないことはテストで固定している。
+    id: "pattern.js.weak_cipher",
+    cwe: "CWE-327",
+    owasp: "A02:2021",
+    severity: "medium",
+    title: "Weak cipher algorithm",
+    message: "DES/3DES, RC2/RC4, Blowfish and IDEA are broken; ECB mode leaks plaintext structure.",
+    remediation: "Use aes-256-gcm (AEAD) with a random IV via crypto.createCipheriv().",
+    exts: JS,
+    pattern: /create(?:De)?Cipher(?:iv)?\s*\(\s*['"`](?:des(?:-[a-z0-9-]*)?|rc[24](?:-[a-z0-9-]*)?|bf(?:-[a-z0-9-]*)?|blowfish|idea(?:-[a-z0-9-]*)?|[a-z0-9-]*-ecb)['"`]/gi,
+  },
   // ── Python ──
   {
     id: "pattern.py.requests_verify_false",
