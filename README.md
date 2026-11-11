@@ -91,7 +91,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 
 ## What it detects
 
-Ruleset `2026.10.23-24`, the version shipped in `@sphior/scan` 0.1.7 and later, `sphior-code-mcp` 1.1.9 and the VS Code extension 0.1.3.
+Ruleset `2026.10.23-24`, the version shipped in `@sphior/scan` 0.1.7 and later, `sphior-code-mcp` 1.1.9 and later, and the VS Code extension 0.1.3 and later.
 
 ### 1. Hard-coded secrets — 36 rules
 
@@ -481,7 +481,7 @@ otherwise from the [command line](#command-line). Neither needs an account.
 ### Claude Code
 
 This repository is a Claude Code plugin marketplace. One install adds the MCP server (pinned to
-`sphior-code-mcp@1.1.9`, so it does not change under you) and all four skills:
+`sphior-code-mcp@1.1.10`, so it does not change under you) and all four skills:
 
 ```
 /plugin marketplace add Toraastrta/sphior-code
@@ -629,9 +629,9 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | Package | Version | Ruleset bundled |
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.8 | `2026.10.23-24` |
-| `sphior-code-mcp` | 1.1.9 | `2026.10.23-24` (through `@sphior/scan` 0.1.7) |
-| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.9`, four skills |
-| VS Code extension, Visual Studio Marketplace | 0.1.3 | `2026.10.23-24` |
+| `sphior-code-mcp` | 1.1.10 | `2026.10.23-24` (through `@sphior/scan` 0.1.8) |
+| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.10`, four skills |
+| VS Code extension, Visual Studio Marketplace | 0.1.4 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.2 | `2026.07.12-22` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
 | `sphior-ai-governance-mcp` | 0.2.2 | — |

@@ -2,6 +2,20 @@
 
 All notable changes to the **SPHIOR CODE** VS Code extension are documented here.
 
+## [0.1.5] — 2026-11-12
+
+- New icon: the SPHIOR ring on black, matching the brand. No functional changes.
+
+## [0.1.4] — 2026-11-12
+
+- Marketplace description corrected. It said the extension produces tamper-evident
+  audit evidence; it does not — the extension finds problems locally, and evidence
+  records are kept by the hosted service.
+- The "Fix with your AI" prompt for an exposed secret no longer suggests rewriting
+  git history; it says rotation is what makes the credential safe.
+- No change to detection: same rule set (`2026.10.23-24`) as 0.1.3, now built from
+  `@sphior/scan` 0.1.8.
+
 ## [0.1.3] — 2026-11-12
 
 - Ships the current rule set, `2026.10.23-24`, replacing `2026.07.12-22`. Editor

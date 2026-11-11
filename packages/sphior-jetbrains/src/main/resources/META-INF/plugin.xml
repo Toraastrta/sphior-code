@@ -4,21 +4,35 @@
     <vendor url="https://sphior.com" email="support@sphior.com">SPHIOR</vendor>
 
     <description><![CDATA[
-      <p><b>SPHIOR CODE</b> — deterministic <b>secrets</b> + insecure-pattern (<b>CWE</b>) detection with
-      tamper-evident audit evidence, right in your JetBrains IDE.</p>
+      <p><b>SPHIOR CODE</b> — deterministic security scanning right in your JetBrains IDE:
+      hard-coded <b>secrets</b>, insecure patterns mapped to <b>CWE</b>, and data-flow (taint) analysis.</p>
       <ul>
         <li><b>No AI, no source upload.</b> Detection is 100% deterministic and runs locally via a
         bundled language server. Your code never leaves your machine.</li>
-        <li><b>Same engine as SPHIOR's service.</b> The detection engine here is the one SPHIOR runs
-        server-side, so what you see in the IDE matches what a connected repository reports. The plugin
-        itself is entirely local — connecting a repository to SPHIOR is optional and separate.</li>
-        <li><b>Fix with your own AI.</b> SPHIOR hands findings to your existing AI assistant over MCP —
-        it does not generate code for you.</li>
+        <li><b>Same engine as the command line.</b> The plugin bundles the language server from
+        <code>@sphior/scan</code>, so the IDE and <code>npx @sphior/scan</code> in CI apply the same rules.</li>
+        <li><b>Fix with your own AI.</b> Each finding carries why it matters and how to fix it, and a
+        quick fix hands it to the AI assistant you already use — SPHIOR does not generate code for you.</li>
       </ul>
       <p><b>Languages:</b> JavaScript, TypeScript (+ JSX/TSX), Python, Go, PHP, Ruby, Java, C#, Rust,
       Kotlin, C, C++, Scala, Swift — analysed with real parsers (tree-sitter), not just regex.</p>
       <p><b>Requires Node.js</b> on PATH (or set <code>SPHIOR_NODE_PATH</code>). Depends on the LSP4IJ plugin.</p>
+      <p>Documentation: <a href="https://github.com/Toraastrta/sphior-code">github.com/Toraastrta/sphior-code</a></p>
     ]]></description>
+
+    <!-- Marketplace の「What's New」欄。版ごとの変更点を利用者の言葉で書く -->
+    <change-notes><![CDATA[
+      <p><b>0.1.2</b></p>
+      <ul>
+        <li>Ships the current rule set, <code>2026.10.23-24</code>, the same as <code>@sphior/scan</code> 0.1.8 on the command line.</li>
+        <li>New detections include weak ciphers in JavaScript/TypeScript and path traversal through
+        <code>fs</code> functions imported by name; fewer false positives on private-key headers.</li>
+        <li>Inline acceptance with <code>// sphior-ignore</code> and <code>// sphior-ignore-next-line</code>, with a reason.</li>
+        <li>The fix prompt for an exposed secret no longer suggests rewriting git history.</li>
+        <li>New icon: the SPHIOR ring on black, matching the brand.</li>
+        <li>Description corrected: the plugin finds problems locally; it does not produce audit evidence on its own.</li>
+      </ul>
+    ]]></change-notes>
 
     <!-- 全 JetBrains IDE で動くよう platform + LSP4IJ にのみ依存（言語プラグイン非依存） -->
     <depends>com.intellij.modules.platform</depends>

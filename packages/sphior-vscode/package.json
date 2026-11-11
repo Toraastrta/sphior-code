@@ -1,8 +1,8 @@
 {
   "name": "sphior-code",
   "displayName": "SPHIOR CODE",
-  "description": "Deterministic secrets + insecure-pattern (CWE) detection with tamper-evident audit evidence. No AI, no source upload — runs locally.",
-  "version": "0.1.3",
+  "description": "Deterministic security scanning in your editor: hard-coded secrets, insecure patterns mapped to CWE, and data-flow (taint) analysis across 14 languages. No AI, no source upload, runs locally.",
+  "version": "0.1.5",
   "publisher": "sphior",
   "license": "MIT",
   "icon": "icon.png",
@@ -33,7 +33,9 @@
     "sast",
     "secrets",
     "cwe",
-    "audit",
+    "owasp",
+    "taint-analysis",
+    "vulnerability",
     "sphior"
   ],
   "activationEvents": [

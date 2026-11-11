@@ -1,16 +1,16 @@
 {
   "name": "sphior-code-mcp",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "sphior-code-mcp",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "license": "MIT",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.0.4",
-        "@sphior/scan": "^0.1.7",
+        "@sphior/scan": "^0.1.8",
         "zod": "^3.23.8"
       },
       "bin": {
@@ -123,9 +123,9 @@
       }
     },
     "node_modules/@sphior/scan": {
-      "version": "0.1.7",
-      "resolved": "https://registry.npmjs.org/@sphior/scan/-/scan-0.1.7.tgz",
-      "integrity": "sha512-CD1q9CE5G1GaqRnQ5yNTg2ueKm0fbydgz1upkWrNI1yotxhmHSS2kJb31sPg/piZmqUfQPsx1yOgIYbRkHw3Xg==",
+      "version": "0.1.8",
+      "resolved": "https://registry.npmjs.org/@sphior/scan/-/scan-0.1.8.tgz",
+      "integrity": "sha512-yp8WLbsWM+9277VwS/vrrdievv9sQ3IkrVZAKvub2dT5A7ml4CPIhW2PDPvH323tMYLf0UqZO21Qll9i7wUeqg==",
       "license": "MIT",
       "dependencies": {
         "@babel/parser": "^7.28.5",
