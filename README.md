@@ -452,8 +452,9 @@ connected on [GitHub](#sphior-code-on-github):
 | `mark_false_positive` | Mark a finding as a false positive, with a reason |
 | `verify_evidence` | Verify the scan-record chain of a repository, optionally with a downloadable evidence pack |
 
-Without a key these tools return a message explaining what they need, rather than failing
-silently. The local scan never contacts SPHIOR's servers in either mode.
+Keys start with `sk_live_`; any other value stops the server at start-up with the reason, rather
+than failing later. Without a key these tools return a message explaining what they need, rather
+than failing silently. The local scan never contacts SPHIOR's servers in either mode.
 
 ---
 
@@ -481,7 +482,7 @@ otherwise from the [command line](#command-line). Neither needs an account.
 ### Claude Code
 
 This repository is a Claude Code plugin marketplace. One install adds the MCP server (pinned to
-`sphior-code-mcp@1.1.10`, so it does not change under you) and all four skills:
+`sphior-code-mcp@1.1.11`, so it does not change under you) and all four skills:
 
 ```
 /plugin marketplace add Toraastrta/sphior-code
@@ -611,7 +612,8 @@ The free plan includes dependency scanning. Code scanning is part of the paid pl
 
 [`packages/ai-governance-mcp`](packages/ai-governance-mcp) (`sphior-ai-governance-mcp`, Apache-2.0)
 is a separate MCP server for recording what AI agents did — actor, model, provider, policy
-decision, tokens, cost, latency, trace id — as tamper-evident evidence for ISO/IEC 42001,
+decision, tokens (optionally split into input, output and cache), cost, latency, trace id — as
+tamper-evident evidence for ISO/IEC 42001,
 the EU AI Act and SOC 2 reviews. Only hashes and metadata are kept, never prompts or outputs.
 
 - Tools: `record_ai_execution` (one event) and `record_ai_executions` (up to 200 events).
@@ -628,13 +630,13 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 
 | Package | Version | Ruleset bundled |
 |---|---|---|
-| `@sphior/scan` (CLI, language server) | 0.1.8 | `2026.10.23-24` |
-| `sphior-code-mcp` | 1.1.10 | `2026.10.23-24` (through `@sphior/scan` 0.1.8) |
-| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.10`, four skills |
+| `@sphior/scan` (CLI, language server) | 0.1.9 | `2026.10.23-24` |
+| `sphior-code-mcp` | 1.1.11 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
+| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.11`, four skills |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
-| `sphior-ai-governance-mcp` | 0.2.2 | — |
+| `sphior-ai-governance-mcp` | 0.2.3 | — |
 
 All surfaces run the same engine code, but each is released on its own schedule, so a surface
 can bundle an earlier ruleset than the CLI for a while. Every run prints its engine and ruleset

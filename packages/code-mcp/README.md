@@ -179,7 +179,7 @@ npm run build
 node bin/sphior-code-mcp.js
 
 # Cloud mode
-SPHIOR_API_KEY=sk_test_xxx node bin/sphior-code-mcp.js
+SPHIOR_API_KEY=sk_live_xxxxxxxxxxxxxxxxxxxx node bin/sphior-code-mcp.js
 # Type a JSON-RPC request to test
 ```
 

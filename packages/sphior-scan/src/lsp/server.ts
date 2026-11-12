@@ -40,6 +40,11 @@ import { initC, initCpp } from "../cfamily-ast";
 import { initScala } from "../scala-ast";
 import { initSwift } from "../swift-ast";
 
+// scripts/build.mjs が package.json の version を埋め込む（esbuild の define）。
+// バンドルせずに直接動かした時（tsc の確認など）は未定義なので "0.0.0-dev" と名乗る。
+declare const __SPHIOR_SCAN_VERSION__: string | undefined;
+const SERVER_VERSION: string = typeof __SPHIOR_SCAN_VERSION__ === "string" ? __SPHIOR_SCAN_VERSION__ : "0.0.0-dev";
+
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 
@@ -56,7 +61,7 @@ connection.onInitialize((): InitializeResult => ({
     textDocumentSync: TextDocumentSyncKind.Full,
     codeActionProvider: { codeActionKinds: [CodeActionKind.QuickFix] },
   },
-  serverInfo: { name: "sphior-scan", version: "0.1.0" },
+  serverInfo: { name: "sphior-scan", version: SERVER_VERSION },
 }));
 
 /** 診断の data に載せる（コードアクション/エージェントが消費）。 */

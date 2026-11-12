@@ -29,8 +29,15 @@ const EventSchema = z.object({
   provider:        z.string().optional(),
   model_version:   z.string().optional(),
   policy_decision: z.string().optional(),
-  tokens:          z.number().optional(),
-  cost:            z.number().optional(),
+  // トークンは内訳で受ける。実効単価は内訳ごとに違う（キャッシュ読み出しは入力の
+  // 約 1/10、作成は約 1.25 倍）ので、合計だけ記録すると後からコストを再計算できない。
+  // どれも任意。報告できないものは**送らない**（0 を入れると「0 件」と区別できない）。
+  tokens:             z.number().optional(),
+  input_tokens:       z.number().optional(),
+  output_tokens:      z.number().optional(),
+  cache_write_tokens: z.number().optional(),
+  cache_read_tokens:  z.number().optional(),
+  cost:               z.number().optional(),
   latency:         z.number().optional(),
   trace_id:        z.string().optional(),
   occurred_at:     z.string().optional(),
@@ -44,8 +51,12 @@ const eventJsonSchema = {
     provider:        { type: "string" },
     model_version:   { type: "string" },
     policy_decision: { type: "string", description: "Your outcome, e.g. allow | deny | flag" },
-    tokens:          { type: "number" },
-    cost:            { type: "number" },
+    tokens:             { type: "number", description: "Total. Omit if you report the breakdown below — it is summed for you." },
+    input_tokens:       { type: "number", description: "Billable input, excluding cache reads" },
+    output_tokens:      { type: "number" },
+    cache_write_tokens: { type: "number", description: "Prompt-cache creation input (charged above base input)" },
+    cache_read_tokens:  { type: "number", description: "Served from prompt cache (charged far below base input)" },
+    cost:               { type: "number", description: "USD you reconcile against your provider invoice. SPHIOR never infers it." },
     latency:         { type: "number", description: "ms" },
     trace_id:        { type: "string", description: "Correlation id" },
     occurred_at:     { type: "string", description: "RFC3339; defaults to now" },
@@ -90,7 +101,7 @@ function requiresToken(): ToolResult | null {
     // 記録を止めないのは、無料期間が証跡の空白にならないようにするため。そこが課金の
     // 動機にもなる（上限で止まるからではなく、既に貯まった分を見るために払う）。
     "The free tier takes no card: it keeps recording up to 100,000 events a month and\n" +
-    "shows you the latest 10,000. Nothing is dropped while you are free — paying reveals\n" +
+    "shows you the first 10,000 of the month. Nothing is dropped while you are free — paying reveals\n" +
     "what has already been recorded, so time spent on the free tier does not become a\n" +
     "gap in your evidence.",
   );

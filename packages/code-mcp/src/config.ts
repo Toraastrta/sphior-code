@@ -39,9 +39,11 @@ function readEnv(): Config {
   // キー未設定は異常ではなく local モード。鍵を取りに行かせずに試せることを優先する
   // （拡張は 100% ローカルで動くのに MCP だけアカウント必須、という非対称を解消する）。
   const apiKey = process.env.SPHIOR_API_KEY?.trim() || null;
-  if (apiKey && !apiKey.startsWith("sk_")) {
+  // サーバー（api/v1/_lib/auth.ts）は sk_live_ で始まる 28 文字以上だけを受ける。
+  // ここで sk_test_ 等を通すと、起動は成功して最初の呼び出しで 401 になり原因が見えにくい。
+  if (apiKey && !(apiKey.startsWith("sk_live_") && apiKey.length >= 28)) {
     throw new Error(
-      `Invalid SPHIOR_API_KEY format (expected sk_live_... or sk_test_...).\n` +
+      `Invalid SPHIOR_API_KEY format (expected sk_live_...). Unset it to use local mode, which needs no key.\n` +
       `Get your API key at: https://sphior.com/app?settings=api`,
     );
   }

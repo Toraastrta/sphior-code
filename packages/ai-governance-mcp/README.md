@@ -18,7 +18,8 @@ Only **hashes and metadata** are stored (`hash_only`) — never your prompts or 
 
 ## Setup
 
-Get an ingestion token from your SPHIOR dashboard: **Account → AI Governance → Ingestion tokens**.
+Create an ingestion token under **Settings** at [sphior.com/app](https://sphior.com/app?settings=aiingest).
+Without a token the server still starts, and its tools explain how to get one; nothing is recorded until it is set.
 
 ### Claude Desktop / Claude Code (`claude_desktop_config.json`)
 
@@ -53,7 +54,8 @@ Each event is canonicalized (RFC 8785 JCS), hashed (SHA-256), chained, and perio
 append-only, independently verifiable record. You and your auditor can verify integrity with the open
 `sphior-verify` tool and standard timestamp tooling — without trusting SPHIOR.
 
-Prefer plain code over an MCP agent? Use the [`sphior-ai-governance`](https://www.npmjs.com/package/sphior-ai-governance) SDK, or POST directly to the ingestion endpoint.
+Prefer plain code over an MCP agent? POST the same events directly to the ingestion endpoint — see the
+[AI governance API reference](https://sphior.com/docs/ai-governance).
 
 ## License
 

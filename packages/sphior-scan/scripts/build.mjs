@@ -8,7 +8,10 @@
  */
 
 import { build } from "esbuild";
-import { rmSync } from "node:fs";
+import { rmSync, readFileSync } from "node:fs";
+
+// LSP の serverInfo.version を package.json と揃える（固定の "0.1.0" が 0.1.8 でも出ていた）
+const PKG_VERSION = JSON.parse(readFileSync("package.json", "utf8")).version;
 
 rmSync("dist", { recursive: true, force: true });
 
@@ -19,6 +22,7 @@ rmSync("dist", { recursive: true, force: true });
 const common = {
   bundle: true, platform: "node", target: "node18", logLevel: "warning",
   legalComments: "eof",
+  define: { __SPHIOR_SCAN_VERSION__: JSON.stringify(PKG_VERSION) },
 };
 
 // CLI — ESM

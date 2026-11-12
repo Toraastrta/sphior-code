@@ -2,6 +2,8 @@
  * config.ts — 環境変数から設定を読み、起動時に検証する。
  */
 
+import { createRequire } from "node:module";
+
 export interface Config {
   /** 未設定なら null。**起動は止めない** — 理由は readEnv のコメント。 */
   token: string | null;
@@ -11,7 +13,15 @@ export interface Config {
   version: string;
 }
 
-const PACKAGE_VERSION = "0.2.1";
+// package.json を正とする。固定値だと公開版とズレる（0.2.2 を出した時に serverInfo が
+// 0.2.1 と名乗っていた）。dist/ も src/ も一つ上が package root（code-mcp と同じ作り）。
+const PACKAGE_VERSION: string = (() => {
+  try {
+    return createRequire(import.meta.url)("../package.json").version as string;
+  } catch {
+    return "0.0.0";
+  }
+})();
 
 function readEnv(): Config {
   // トークンが無くても**起動は通す**。ここで throw すると MCP クライアントには
