@@ -1,0 +1,10 @@
+id = "sphior-code-mcp-server"
+name = "SPHIOR CODE MCP Server"
+version = "0.1.0"
+schema_version = 1
+authors = ["SPHIOR <support@sphior.com>"]
+description = "Gives Zed's agent deterministic security findings and fix guidance for your workspace. Runs locally, no account needed."
+repository = "https://github.com/Toraastrta/sphior-code"
+
+# The server (sphior-code-mcp) is installed from npm on first use; nothing is bundled.
+[context_servers.sphior-code]

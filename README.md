@@ -83,6 +83,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **CI** | `@sphior/scan` | SARIF for GitHub code scanning and most CI dashboards. `--fail-on` gate. |
 | **VS Code** (and Cursor, Windsurf, VSCodium) | [`sphior.sphior-code`](https://marketplace.visualstudio.com/items?itemName=sphior.sphior-code) · [Open VSX](https://open-vsx.org/extension/sphior/sphior-code) | Findings as you type. A quick fix that hands the finding to your AI. |
 | **JetBrains IDEs** | [plugin 33696](https://plugins.jetbrains.com/plugin/33696-sphior-code) | The same in IntelliJ IDEA, PyCharm, WebStorm, GoLand, Rider, PhpStorm, RubyMine, CLion and others. |
+| **Zed** | [`packages/sphior-zed`](#zed) | Findings as you type, and the MCP server for Zed's agent. Two extensions. |
 | **AI coding assistants** | [`sphior-code-mcp`](https://www.npmjs.com/package/sphior-code-mcp) | An MCP server. Your assistant scans the workspace and receives the location and the remediation for each finding. |
 | **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
 | **Claude Code** | [plugin in this repository](#claude-code) | The MCP server and all four skills in one install. |
@@ -375,6 +376,25 @@ JetBrains IDE from 2024.2, because files are matched by name rather than through
   If none is found, it shows a notification with a download link.
 - **Requires LSP4IJ.** The Marketplace installs it automatically.
 - Findings appear in the editor with the same messages, severities and quick fix as in VS Code.
+
+---
+
+## Zed
+
+Two extensions, because Zed keeps language servers and MCP servers apart:
+
+| Extension | What it does |
+|---|---|
+| `sphior-code-lsp` | Findings in the editor as you type, in JavaScript, TypeScript, Python, Go, Rust, C, C++, PHP, Ruby, Java, Kotlin, Scala, Swift and C#. |
+| `sphior-code-mcp-server` | Connects Zed's agent to the [MCP server](#ai-coding-assistants-mcp). |
+
+Both use Zed's own Node.js and install the scanner from npm on first use (`@sphior/scan` and
+`sphior-code-mcp`), so there is nothing else to set up. Neither needs an account; the MCP server
+takes an optional API key in its settings.
+
+They are submitted to Zed's extension registry. Until they appear there, install them from a clone:
+open **Extensions**, choose **Install Dev Extension**, and select `packages/sphior-zed/lsp`, then
+`packages/sphior-zed/mcp-server`.
 
 ---
 

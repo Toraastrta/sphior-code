@@ -1,0 +1,15 @@
+id = "sphior-code-lsp"
+name = "SPHIOR CODE"
+version = "0.1.0"
+schema_version = 1
+authors = ["SPHIOR <support@sphior.com>"]
+description = "Security diagnostics as you type: hard-coded secrets, insecure patterns mapped to CWE and taint flows. Deterministic and local, no account."
+repository = "https://github.com/Toraastrta/sphior-code"
+
+# The same engine as the CLI (@sphior/scan). Zed installs it from npm on first use; nothing is bundled.
+[language_servers.sphior-code]
+name = "SPHIOR CODE"
+languages = [
+  "JavaScript", "TypeScript", "TSX", "Python", "Go", "Rust", "C", "C++",
+  "PHP", "Ruby", "Java", "Kotlin", "Scala", "Swift", "CSharp",
+]

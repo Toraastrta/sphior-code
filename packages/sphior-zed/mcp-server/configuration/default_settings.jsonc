@@ -1,0 +1,5 @@
+{
+  /// Optional. Leave empty for local mode (no account needed).
+  /// Add a key starting with sk_live_ to enable the account tools.
+  "sphior_api_key": ""
+}
