@@ -1,0 +1,17 @@
+{
+  "name": "sphior",
+  "owner": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com"
+  },
+  "metadata": {
+    "description": "Security tooling from SPHIOR — deterministic scanning for your code and dependencies."
+  },
+  "plugins": [
+    {
+      "name": "sphior-code",
+      "source": "plugin",
+      "description": "Deterministic security scanning with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally, no account needed."
+    }
+  ]
+}

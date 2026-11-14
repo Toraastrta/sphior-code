@@ -1,0 +1,33 @@
+{
+  "name": "sphior-code",
+  "displayName": "SPHIOR CODE",
+  "version": "0.2.1",
+  "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally, no account needed.",
+  "author": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com"
+  },
+  "publisher": "SPHIOR",
+  "homepage": "https://sphior.com/code",
+  "repository": "https://github.com/Toraastrta/sphior-code",
+  "license": "MIT",
+  "logo": ".claude-plugin/icon.png",
+  "keywords": [
+    "security",
+    "sast",
+    "sca",
+    "secrets",
+    "cwe",
+    "taint-analysis",
+    "mcp"
+  ],
+  "category": "security",
+  "tags": [
+    "security",
+    "code-review",
+    "ci",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

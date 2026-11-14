@@ -86,6 +86,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **AI coding assistants** | [`sphior-code-mcp`](https://www.npmjs.com/package/sphior-code-mcp) | An MCP server. Your assistant scans the workspace and receives the location and the remediation for each finding. |
 | **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
 | **Claude Code** | [plugin in this repository](#claude-code) | The MCP server and all four skills in one install. |
+| **Cursor** | [plugin in this repository](#cursor) | The same plugin for Cursor's agent: the MCP server and all four skills. |
 
 ---
 
@@ -488,6 +489,23 @@ This repository is a Claude Code plugin marketplace. One install adds the MCP se
 /plugin marketplace add Toraastrta/sphior-code
 /plugin install sphior-code@sphior
 ```
+
+### Cursor
+
+This repository is also a Cursor plugin. It adds the same MCP server (pinned to
+`sphior-code-mcp@1.1.12`) and all four skills to Cursor's agent. To install it from a clone:
+
+```bash
+git clone --depth 1 https://github.com/Toraastrta/sphior-code.git ~/.sphior-code
+mkdir -p ~/.cursor/plugins/local
+ln -s ~/.sphior-code/plugin ~/.cursor/plugins/local/sphior-code
+```
+
+Then run **Developer: Reload Window**. The skills appear under the plugin, and Cursor asks you to
+approve the MCP server `plugin-sphior-code-sphior-code` the first time it starts. Neither needs an
+account. To update, run `git -C ~/.sphior-code pull` and reload.
+
+If you only want the skills, copy them as described in the next section.
 
 ### Codex, Cursor, GitHub Copilot
 
