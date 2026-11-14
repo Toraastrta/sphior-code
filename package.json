@@ -1,0 +1,11 @@
+{
+  "name": "sphior-code-pre-commit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "pre-commit hook for SPHIOR CODE (.pre-commit-hooks.yaml). The scanner itself is the @sphior/scan package.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "sphior-code-pre-commit": "pre-commit/hook.mjs" },
+  "files": ["pre-commit/"],
+  "dependencies": { "@sphior/scan": "0.1.9" }
+}

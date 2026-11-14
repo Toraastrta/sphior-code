@@ -1,0 +1,13 @@
+# pre-commit hook for SPHIOR CODE (https://pre-commit.com).
+# Scans the whole repository on each commit with the deterministic engine (@sphior/scan), lists each
+# finding with its file, line and fix, and fails when a finding is at or above the threshold.
+# Override the threshold with `args`, e.g.
+#   args: [--fail-on, critical]
+- id: sphior-code
+  name: SPHIOR CODE security scan
+  description: Hard-coded secrets, insecure patterns mapped to CWE and taint flows. Runs locally, no account.
+  entry: sphior-code-pre-commit
+  args: [--fail-on, high]
+  language: node
+  pass_filenames: false
+  minimum_pre_commit_version: "3.0.0"

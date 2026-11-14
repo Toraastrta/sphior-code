@@ -81,6 +81,8 @@ One detection engine, several ways in. Everything in this table runs locally and
 |---|---|---|
 | **Command line** | [`@sphior/scan`](https://www.npmjs.com/package/@sphior/scan) | Scan a directory. Table, SARIF, JSON or AI fix context. Fails the build by severity. |
 | **CI** | `@sphior/scan` | SARIF for GitHub code scanning and most CI dashboards. `--fail-on` gate. |
+| **GitHub Actions** | [`Toraastrta/sphior-scan-action`](https://github.com/marketplace/actions/sphior-code-security-scan) | One step: scan, job summary, Security tab, `fail-on` gate. |
+| **pre-commit** | [hook in this repository](#pre-commit) | Scan before every commit and stop it on serious findings. |
 | **VS Code** (and Cursor, Windsurf, VSCodium) | [`sphior.sphior-code`](https://marketplace.visualstudio.com/items?itemName=sphior.sphior-code) · [Open VSX](https://open-vsx.org/extension/sphior/sphior-code) | Findings as you type. A quick fix that hands the finding to your AI. |
 | **JetBrains IDEs** | [plugin 33696](https://plugins.jetbrains.com/plugin/33696-sphior-code) | The same in IntelliJ IDEA, PyCharm, WebStorm, GoLand, Rider, PhpStorm, RubyMine, CLion and others. |
 | **Zed** | [`packages/sphior-zed`](#zed) | Findings as you type, and the MCP server for Zed's agent. Two extensions. |
@@ -291,6 +293,26 @@ jobs:
   `--fail-on` step and drop the upload.
 
 Any other CI works the same way: run the command, read the exit code, archive the SARIF or JSON.
+
+On GitHub, the [SPHIOR CODE Security Scan](https://github.com/marketplace/actions/sphior-code-security-scan)
+action does all of this in one step (`uses: Toraastrta/sphior-scan-action@v1`) and adds a job summary.
+
+### pre-commit
+
+Scan before every commit with [pre-commit](https://pre-commit.com). Add to `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/Toraastrta/sphior-code
+    rev: main  # pin to a commit SHA for reproducible results
+    hooks:
+      - id: sphior-code
+        # args: [--fail-on, critical]  # default: high
+```
+
+Then run `pre-commit install`. The hook scans the repository and lists each finding with its file,
+line and fix; a finding at or above the threshold stops the commit. It needs Node.js 18 or later,
+which pre-commit provides if it is not installed.
 
 ---
 
