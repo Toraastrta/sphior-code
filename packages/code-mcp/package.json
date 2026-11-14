@@ -1,6 +1,6 @@
 {
   "name": "sphior-code-mcp",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "mcpName": "io.github.Toraastrta/sphior-code-mcp",
   "description": "MCP server for SPHIOR CODE — your AI coding assistant scans the workspace locally (secrets, CWE patterns, taint analysis) and gets deterministic fix guidance. No account or API key needed; optionally reads repositories connected to SPHIOR.",
   "keywords": [
@@ -58,7 +58,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@sphior/scan": "^0.1.9",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

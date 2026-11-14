@@ -482,7 +482,7 @@ otherwise from the [command line](#command-line). Neither needs an account.
 ### Claude Code
 
 This repository is a Claude Code plugin marketplace. One install adds the MCP server (pinned to
-`sphior-code-mcp@1.1.11`, so it does not change under you) and all four skills:
+`sphior-code-mcp@1.1.12`, so it does not change under you) and all four skills:
 
 ```
 /plugin marketplace add Toraastrta/sphior-code
@@ -631,12 +631,12 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | Package | Version | Ruleset bundled |
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.9 | `2026.10.23-24` |
-| `sphior-code-mcp` | 1.1.11 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.11`, four skills |
+| `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
+| Claude Code plugin `sphior-code` | 0.2.0 | pins `sphior-code-mcp@1.1.12`, four skills |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
-| `sphior-ai-governance-mcp` | 0.2.3 | — |
+| `sphior-ai-governance-mcp` | 0.2.4 | — |
 
 All surfaces run the same engine code, but each is released on its own schedule, so a surface
 can bundle an earlier ruleset than the CLI for a while. Every run prints its engine and ruleset
