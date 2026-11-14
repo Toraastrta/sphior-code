@@ -31,9 +31,9 @@ This is a standard MCP stdio server, so it works with **any MCP-compatible clien
 |---|---|---|
 | **Cursor** | `~/.cursor/mcp.json` | [Add MCP](https://cursor.sh/) |
 | **Claude Code** | `~/.claude.json` | `claude mcp add sphior-code -- npx sphior-code-mcp` |
-| **VS Code** | `~/.config/Code/User/settings.json` (`mcp.servers`) | Built-in MCP |
+| **VS Code** | User `settings.json` (`mcp.servers`), opened with **Preferences: Open User Settings (JSON)** | Built-in MCP |
 | **GitHub Copilot (VS Code)** | `.vscode/mcp.json` | Native MCP |
-| **Cline** (VS Code extension) | `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` | Settings UI |
+| **Cline** (VS Code / Cursor extension) | `cline_mcp_settings.json`, opened from **MCP Servers → Configure** (the path differs by OS and Cline version) | Settings UI |
 | **Continue** (VS Code extension) | `~/.continue/config.yaml` | `mcpServers:` section |
 | **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | Settings UI |
 | **Zed** | `~/.config/zed/settings.json` (`context_servers`) | Native MCP |

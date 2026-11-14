@@ -10,8 +10,11 @@ it in the MCP settings so the user can use it in every task.
 
 ## Add the server to the MCP settings
 
-Add this entry to `mcpServers` in the MCP settings file (for Cline, `cline_mcp_settings.json`),
-keeping any servers that are already there:
+Add this entry to `mcpServers` in the MCP settings file the client actually reads, keeping any
+servers that are already there. For Cline, that is `cline_mcp_settings.json`, opened from
+**MCP Servers → Configure**. Its location differs by operating system and Cline version, so do not
+create a new file at a guessed path; edit the one Cline opens, then confirm `sphior-code` appears
+in the MCP Servers view.
 
 ```json
 {
