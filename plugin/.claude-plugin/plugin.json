@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "sphior-code",
   "displayName": "SPHIOR CODE",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally, no account needed.",
   "author": {
     "name": "SPHIOR",
