@@ -13,7 +13,8 @@ read the real code from the workspace you already have.
 
 Use the first option that is available.
 
-**A. The `sphior-code` MCP server** (installed with the SPHIOR CODE plugin, or by the user).
+**A. The `sphior-code` MCP server**, if it is connected (the Cursor plugin installs it; in Claude
+Code the user adds it with `claude mcp add sphior-code -- npx -y sphior-code-mcp`).
 Call `get_fix_context`.
 
 - No arguments → scans the directory this session is working in.

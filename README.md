@@ -88,7 +88,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **Zed** | [`packages/sphior-zed`](#zed) | Findings as you type, and the MCP server for Zed's agent. Two extensions. |
 | **AI coding assistants** | [`sphior-code-mcp`](https://www.npmjs.com/package/sphior-code-mcp) | An MCP server. Your assistant scans the workspace and receives the location and the remediation for each finding. |
 | **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
-| **Claude Code** | [plugin in this repository](#claude-code) | The MCP server and all four skills in one install. |
+| **Claude Code** | [plugin in this repository](#claude-code) | All four skills in one install; add the MCP server with one command. |
 | **Cursor** | [plugin in this repository](#cursor) | The same plugin for Cursor's agent: the MCP server and all four skills. |
 
 ---
@@ -524,17 +524,23 @@ otherwise from the [command line](#command-line). Neither needs an account.
 
 ### Claude Code
 
-This repository is a Claude Code plugin marketplace. One install adds the MCP server (pinned to
-`sphior-code-mcp@1.1.12`, so it does not change under you) and all four skills:
+This repository is a Claude Code plugin marketplace. One install adds all four skills:
 
 ```
 /plugin marketplace add Toraastrta/sphior-code
 /plugin install sphior-code@sphior
 ```
 
+The skills run the scanner through the command line (`npx @sphior/scan`). To give them the MCP
+server as well, add it once:
+
+```bash
+claude mcp add sphior-code -- npx -y sphior-code-mcp
+```
+
 ### Cursor
 
-This repository is also a Cursor plugin. It adds the same MCP server (pinned to
+This repository is also a Cursor plugin. It adds the MCP server (pinned to
 `sphior-code-mcp@1.1.12`) and all four skills to Cursor's agent. To install it from a clone:
 
 ```bash
@@ -692,7 +698,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.9 | `2026.10.23-24` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code plugin `sphior-code` | 0.2.1 | pins `sphior-code-mcp@1.1.12`, four skills |
+| Claude Code / Cursor plugin `sphior-code` | 0.3.0 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |

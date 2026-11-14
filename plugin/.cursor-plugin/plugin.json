@@ -1,7 +1,7 @@
 {
   "name": "sphior-code",
   "displayName": "SPHIOR CODE",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally, no account needed.",
   "author": {
     "name": "SPHIOR",
@@ -29,5 +29,13 @@
     "mcp"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "sphior-code": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "sphior-code-mcp@1.1.12"
+      ]
+    }
+  }
 }
