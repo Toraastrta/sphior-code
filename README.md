@@ -222,6 +222,9 @@ npx @sphior/scan run <dir> [options]
 # or install it
 npm install -g @sphior/scan
 sphior-scan run <dir> [options]
+
+# or with Homebrew
+brew install toraastrta/sphior/sphior-scan
 ```
 
 | Option | What it does |
@@ -566,7 +569,13 @@ If you only want the skills, copy them as described in the next section.
 
 ### Codex, Cursor, GitHub Copilot
 
-Copy the skill folders into the directory your agent reads:
+With the [skills](https://skills.sh) CLI, one command installs them for the agents you use:
+
+```bash
+npx skills add Toraastrta/sphior-code
+```
+
+Or copy the skill folders into the directory your agent reads:
 
 | Agent | In one repository | For all your projects |
 |---|---|---|
