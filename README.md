@@ -90,6 +90,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
 | **Claude Code** | [plugin in this repository](#claude-code) | All four skills in one install; add the MCP server with one command. |
 | **Cursor** | [plugin in this repository](#cursor) | The same plugin for Cursor's agent: the MCP server and all four skills. |
+| **Kiro** | [`agent-plugin/`](#kiro-and-other-agent-plugins-hosts) | The four skills and the MCP server as a Kiro power (Agent Plugins format). |
 
 ---
 
@@ -554,6 +555,12 @@ approve the MCP server `plugin-sphior-code-sphior-code` the first time it starts
 account. To update, run `git -C ~/.sphior-code pull` and reload.
 
 If you only want the skills, copy them as described in the next section.
+
+### Kiro and other Agent Plugins hosts
+
+[`agent-plugin/`](agent-plugin) is the same four skills and MCP server in the open
+[Agent Plugins](https://agent-plugins.org) format. In Kiro, add it as a power from GitHub with
+`https://github.com/Toraastrta/sphior-code/tree/main/agent-plugin`.
 
 ### Codex, Cursor, GitHub Copilot
 

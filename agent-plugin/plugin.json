@@ -1,0 +1,48 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sphior-code",
+  "version": "0.3.1",
+  "description": "Deterministic security scanning with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally through the SPHIOR CODE CLI, no account needed.",
+  "author": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com",
+    "url": "https://sphior.com"
+  },
+  "homepage": "https://sphior.com/code",
+  "repository": "https://github.com/Toraastrta/sphior-code",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "sast",
+    "sca",
+    "secrets",
+    "cwe",
+    "taint-analysis"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "SPHIOR CODE",
+        "shortDescription": "Find and fix security issues",
+        "longDescription": "Scans your code for hard-coded secrets, insecure patterns mapped to CWE and taint flows in 14 languages, with deterministic rules: the same code always gives the same result. Four skills fix the findings and re-scan to confirm, triage false positives with a written reason, set up a CI gate, and give a ready / not-ready verdict before release. Runs locally with the open-source CLI; no account, API key or source upload.",
+        "developerName": "SPHIOR",
+        "category": "Security",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "websiteURL": "https://sphior.com/code",
+        "supportURL": "https://sphior.com/support",
+        "privacyPolicyURL": "https://sphior.com/privacy",
+        "termsOfServiceURL": "https://sphior.com/terms",
+        "defaultPrompt": [
+          "Scan this project for security issues and fix the critical ones.",
+          "Is this ready to ship? Run a pre-release security check."
+        ],
+        "brandColor": "#000000",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/logo.png"
+      }
+    }
+  }
+}
