@@ -12,6 +12,8 @@ the same findings.
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/sphior.sphior-code?label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=sphior.sphior-code)
 [![Open VSX](https://img.shields.io/open-vsx/v/sphior/sphior-code?label=Open%20VSX)](https://open-vsx.org/extension/sphior/sphior-code)
 [![JetBrains Plugin](https://img.shields.io/jetbrains/plugin/v/33696-sphior-code?label=JetBrains)](https://plugins.jetbrains.com/plugin/33696-sphior-code)
+[![Glama MCP server](https://glama.ai/mcp/servers/Toraastrta/sphior-code/badges/score.svg)](https://glama.ai/mcp/servers/Toraastrta/sphior-code)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/toraastrta/sphior-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
