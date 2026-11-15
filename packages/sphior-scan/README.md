@@ -27,7 +27,7 @@ Requires Node.js 18 or newer.
 ## Usage
 
 ```
-sphior-scan run <dir> [options]
+sphior-scan run <dir|file> [options]
 
 Options:
   --sarif <file>         write SARIF 2.1.0 (GitHub code scanning, most CI tools)
@@ -47,8 +47,16 @@ to stderr.
 sphior-scan run ./src --fail-on high
 ```
 
+Pass a single file to scan just that file — handy in editor or agent hooks that run after every
+save. `.sphiorignore` is read from the current directory and paths are reported relative to it,
+the same as a directory scan from there.
+
+```bash
+sphior-scan run src/api/users.ts --fail-on high
+```
+
 Exit codes: `0` when nothing reached `--fail-on` (or no threshold was given), `1` when something
-did, `2` when nothing was scanned — the directory does not exist, or an option is unknown or has
+did, `2` when nothing was scanned — the path does not exist, or an option is unknown or has
 an invalid value — so a typo in CI never passes as a clean scan. Options accept `--option value`
 and `--option=value`.
 

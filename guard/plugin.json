@@ -1,0 +1,42 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sphior-code-guard",
+  "version": "0.1.0",
+  "description": "Scans every file your agent writes or edits with SPHIOR CODE's deterministic rules (secrets, CWE patterns, taint flows) and hands high-severity findings straight back, so the agent fixes them before moving on. Runs locally, no account needed.",
+  "author": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com",
+    "url": "https://sphior.com"
+  },
+  "homepage": "https://sphior.com/code",
+  "repository": "https://github.com/Toraastrta/sphior-code",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "sast",
+    "secrets",
+    "cwe",
+    "hooks"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "SPHIOR CODE Guard",
+        "shortDescription": "Scan each file Codex writes",
+        "longDescription": "After every file Codex writes or patches, SPHIOR CODE scans that file with deterministic rules for hard-coded secrets, insecure patterns mapped to CWE and taint flows. High-severity findings go straight back to Codex with the line, the reason and how to fix it, so it fixes them before moving on. Runs locally with the open-source CLI; no account, API key or source upload.",
+        "developerName": "SPHIOR",
+        "category": "Security",
+        "capabilities": [
+          "Read"
+        ],
+        "websiteURL": "https://sphior.com/code",
+        "supportURL": "https://sphior.com/support",
+        "privacyPolicyURL": "https://sphior.com/privacy",
+        "termsOfServiceURL": "https://sphior.com/terms",
+        "brandColor": "#000000",
+        "composerIcon": "./.claude-plugin/icon.png",
+        "logo": "./.claude-plugin/icon.png"
+      }
+    }
+  }
+}

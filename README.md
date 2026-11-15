@@ -31,6 +31,7 @@ the same findings.
 - [JetBrains IDEs](#jetbrains-ides)
 - [AI coding assistants (MCP)](#ai-coding-assistants-mcp)
 - [Agent skills](#agent-skills) — Claude Code, Codex, Cursor, GitHub Copilot, claude.ai
+- [Scan on every edit](#scan-on-every-edit) — Claude Code, Codex, Cursor
 - [Evidence records](#evidence-records)
 - [Privacy and data boundary](#privacy-and-data-boundary)
 - [What it does not do](#what-it-does-not-do)
@@ -81,7 +82,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 
 | Surface | Package | What you get |
 |---|---|---|
-| **Command line** | [`@sphior/scan`](https://www.npmjs.com/package/@sphior/scan) | Scan a directory. Table, SARIF, JSON or AI fix context. Fails the build by severity. |
+| **Command line** | [`@sphior/scan`](https://www.npmjs.com/package/@sphior/scan) | Scan a directory or a single file. Table, SARIF, JSON or AI fix context. Fails the build by severity. |
 | **CI** | `@sphior/scan` | SARIF for GitHub code scanning and most CI dashboards. `--fail-on` gate. |
 | **GitHub Actions** | [`Toraastrta/sphior-scan-action`](https://github.com/marketplace/actions/sphior-code-security-scan) | One step: scan, job summary, Security tab, `fail-on` gate. |
 | **pre-commit** | [hook in this repository](#pre-commit) | Scan before every commit and stop it on serious findings. |
@@ -93,6 +94,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **Claude Code** | [plugin in this repository](#claude-code) | All four skills in one install; add the MCP server with one command. |
 | **Cursor** | [plugin in this repository](#cursor) | The same plugin for Cursor's agent: the MCP server and all four skills. |
 | **Kiro** | [`agent-plugin/`](#kiro-and-other-agent-plugins-hosts) | The four skills and the MCP server as a Kiro power (Agent Plugins format). |
+| **Scan on every edit** | [`guard/`](#scan-on-every-edit) | Each file your agent writes is scanned, and serious findings go straight back to it to fix. Claude Code, Codex and Cursor. |
 
 ---
 
@@ -217,11 +219,11 @@ that starts firing on a known-safe variant, fails the build rather than shipping
 ## Command line
 
 ```bash
-npx @sphior/scan run <dir> [options]
+npx @sphior/scan run <dir|file> [options]
 
 # or install it
 npm install -g @sphior/scan
-sphior-scan run <dir> [options]
+sphior-scan run <dir|file> [options]
 
 # or with Homebrew
 brew install toraastrta/sphior/sphior-scan
@@ -250,10 +252,15 @@ engine and ruleset versions is always written to standard error.
 |---|---|
 | `0` | Scan completed, and nothing reached the `--fail-on` threshold (or no threshold was given). |
 | `1` | At least one finding at or above `--fail-on`. |
-| `2` | Nothing was scanned: the directory does not exist, or an option is unknown or has an invalid value. Never reported as a clean result. |
+| `2` | Nothing was scanned: the path does not exist, or an option is unknown or has an invalid value. Never reported as a clean result. |
 
 A directory with no scannable files is reported as such, with a warning, instead of as
 "0 findings".
+
+**A single file.** From 0.1.10 you can pass one file instead of a directory, which is what editor
+and agent hooks need after each save. `.sphiorignore` is read from the current directory and
+paths are reported relative to it, the same as a directory scan from there. A file that is skipped
+(binary, over 512 KB) is reported with the reason.
 
 **What is read.** Text files up to 512 KB. Files with a NUL byte in the first 8 KB are treated as
 binary and skipped. Build output and fetched dependencies are skipped by directory name:
@@ -608,6 +615,54 @@ file to the conversation. The skill works from it.
 
 ---
 
+## Scan on every edit
+
+`sphior-code-guard` is a separate plugin with no skills: after every file your agent writes or
+edits, it scans that one file and hands anything **high or critical** straight back to the agent —
+the line, why it matters and how to fix it. The agent fixes it before moving on, and the next edit
+is scanned again. When the file is clean it says nothing.
+
+It runs `npx @sphior/scan@0.1.10 run <file>` on your machine. No account, nothing uploaded. Paths
+in `.sphiorignore` are skipped as usual. If the scanner cannot run (no Node.js, offline on first
+use), the agent keeps working and you see one line saying the file was not scanned.
+
+| Agent | When it scans | How findings reach the agent |
+|---|---|---|
+| **Claude Code** | Right after each write or edit | Returned with the tool result |
+| **Codex** | Right after each patch | Added to the turn's context |
+| **Cursor** | When the agent finishes a turn, for every file it edited | Sent as a follow-up message (at most 3 in a row) |
+
+**Claude Code**
+
+```
+/plugin marketplace add Toraastrta/sphior-code
+/plugin install sphior-code-guard@sphior
+```
+
+**Codex**
+
+```bash
+codex plugin marketplace add Toraastrta/sphior-code
+```
+
+Install **sphior-code-guard** from `/plugins`, then approve its hook in `/hooks` (in the app:
+**Settings → Hooks**). Codex does not run plugin hooks until you approve them.
+
+**Cursor**
+
+```bash
+git clone --depth 1 https://github.com/Toraastrta/sphior-code.git ~/.sphior-code
+mkdir -p ~/.cursor/plugins/local
+ln -s ~/.sphior-code/guard ~/.cursor/plugins/local/sphior-code-guard
+```
+
+Then run **Developer: Reload Window**.
+
+Optional settings, as environment variables: `SPHIOR_GUARD_FAIL_ON` (`critical`, `high` — the
+default — `medium` or `low`) and `SPHIOR_GUARD_DISABLE=1` to turn it off.
+
+---
+
 ## Evidence records
 
 [`packages/sphior-scan/src/engine/evidence`](packages/sphior-scan/src/engine/evidence) is the
@@ -714,9 +769,10 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 
 | Package | Version | Ruleset bundled |
 |---|---|---|
-| `@sphior/scan` (CLI, language server) | 0.1.9 | `2026.10.23-24` |
+| `@sphior/scan` (CLI, language server) | 0.1.10 | `2026.10.23-24` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
 | Claude Code / Cursor plugin `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
+| Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.0 | runs `@sphior/scan@0.1.10` on each edited file |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |

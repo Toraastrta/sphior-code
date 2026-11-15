@@ -1,14 +1,16 @@
 /**
- * cli.ts — `sphior-scan run <dir>`（GitHub Action の実体・self-host 基盤）
+ * cli.ts — `sphior-scan run <dir|file>`（GitHub Action の実体・self-host 基盤）
  *
- * ディレクトリを収集 → runScan → SARIF 出力 → `--fail-on` で終了コード。
+ * ディレクトリ（またはファイル 1 つ）を収集 → runScan → SARIF 出力 → `--fail-on` で終了コード。
+ * ファイル 1 つは、書くたびの検査（AI のエージェント・エディタのフック）用（2026-11-15）。
  * process に直接依存しない `runCli()`（テスト可能）と、薄い bin ラッパを分離。
  */
 
 import { existsSync, statSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, relative, resolve } from "node:path";
 import type { Severity } from "./types";
 import { runScan, type RunScanResult } from "./run";
-import { collectSourceFiles, readSphiorignore } from "./collect";
+import { collectSingleFile, collectSourceFiles, readSphiorignore, type CollectedFile } from "./collect";
 import { makePathExcluder, countWithoutJustification, EMPTY_CONFIG, SPHIORIGNORE_FILE } from "./suppress";
 import { canonicalJson } from "./canonical";
 import { buildFixContexts } from "./mcp/fix-context";
@@ -91,7 +93,7 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
   const [cmd, dir, ...rest] = argv;
 
   if (cmd !== "run" || !dir) {
-    logErr("usage: sphior-scan run <dir> [--sarif out.sarif] [--json out.json] [--fix-context out.json] [--suppressed out.json] [--fail-on high] [--no-ignore-file]");
+    logErr("usage: sphior-scan run <dir|file> [--sarif out.sarif] [--json out.json] [--fix-context out.json] [--suppressed out.json] [--fail-on high] [--no-ignore-file]");
     return { exitCode: 2, error: "bad_args" };
   }
 
@@ -107,15 +109,26 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
   // 走査対象が存在しないのに「0 findings・exit 0」を返すと、CI のパス打ち間違いが
   // 永久に緑になる。「0 件検出」と「0 件走査」は別物として扱う
   // （証跡側で collection_failure / heartbeat を分けているのと同じ原則）。
-  if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-    logErr(`error: directory not found: ${dir}`);
+  // 相対パスは作業ディレクトリ基準で解決する（ctx.cwd 未指定ならプロセスの cwd＝従来どおり）
+  const base = resolve(ctx.cwd ?? ".");
+  const target = resolve(base, dir);
+  const stat = existsSync(target) ? statSync(target) : null;
+  if (!stat || (!stat.isDirectory() && !stat.isFile())) {
+    logErr(`error: path not found: ${dir}`);
     logErr("  Nothing was scanned, so this is not a clean result. Check the path.");
     return { exitCode: 2, error: "dir_not_found" };
   }
+  const singleFile = stat.isFile();
+
+  // ファイル 1 つの時は、作業ディレクトリ（プロジェクトの直下）を基準にする。
+  // `.sphiorignore` をそこから読み、所見のパスもそこからの相対で出す（フォルダで走査した時と同じ表記）。
+  // 作業ディレクトリの外のファイルなら、そのファイルのフォルダを基準にする。
+  const relToBase = relative(base, target);
+  const root = !singleFile ? target : relToBase.startsWith("..") || isAbsolute(relToBase) ? dirname(target) : base;
 
   // `.sphiorignore`: パス除外は収集時に、ルール限定の抑制は runScan 側に渡す。
   // 「見なかった」と「見たが受け入れた」を分けて数えるため、除外はここで数える。
-  const ignoreCfg = flags["no-ignore-file"] ? EMPTY_CONFIG : readSphiorignore(dir);
+  const ignoreCfg = flags["no-ignore-file"] ? EMPTY_CONFIG : readSphiorignore(root);
   const isExcluded = makePathExcluder(ignoreCfg);
   let excludedCount = 0;
   const exclude = (relPath: string) => {
@@ -128,7 +141,17 @@ export function runCli(argv: string[], ctx: CliContext = {}): CliResult {
     logErr(`warning: ${SPHIORIGNORE_FILE}:${p.line}: ${p.reason} — ignored this line (“${p.text}”)`);
   }
 
-  const files = collectSourceFiles(dir, { exclude });
+  let files: CollectedFile[];
+  if (singleFile) {
+    const one = collectSingleFile(root, target, { exclude });
+    files = "file" in one ? [one.file] : [];
+    // 除外は件数として下のサマリに出る。それ以外の「読まなかった理由」はここで言う
+    if ("skipped" in one && one.skipped !== "excluded") {
+      logErr(`warning: ${dir} was not scanned (${one.skipped.replace("_", " ")}).`);
+    }
+  } else {
+    files = collectSourceFiles(target, { exclude });
+  }
   const result = runScan({ files, suppress: ignoreCfg });
   const sarifJson = canonicalJson(result.sarif);
 

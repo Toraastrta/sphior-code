@@ -1,0 +1,30 @@
+{
+  "name": "sphior-code-guard",
+  "displayName": "SPHIOR CODE Guard",
+  "version": "0.1.0",
+  "description": "Scans every file your agent writes or edits with SPHIOR CODE's deterministic rules (secrets, CWE patterns, taint flows) and hands high-severity findings straight back, so the agent fixes them before moving on. Runs locally, no account needed.",
+  "author": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com"
+  },
+  "publisher": "SPHIOR",
+  "homepage": "https://sphior.com/code",
+  "repository": "https://github.com/Toraastrta/sphior-code",
+  "license": "MIT",
+  "logo": ".claude-plugin/icon.png",
+  "keywords": [
+    "security",
+    "sast",
+    "secrets",
+    "cwe",
+    "hooks",
+    "vibe-coding"
+  ],
+  "category": "security",
+  "tags": [
+    "security",
+    "code-review",
+    "hooks"
+  ],
+  "hooks": "./hooks/cursor-hooks.json"
+}

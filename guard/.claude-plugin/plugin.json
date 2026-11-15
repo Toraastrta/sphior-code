@@ -1,0 +1,26 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "sphior-code-guard",
+  "displayName": "SPHIOR CODE Guard",
+  "version": "0.1.0",
+  "description": "Scans every file your agent writes or edits with SPHIOR CODE's deterministic rules (secrets, CWE patterns, taint flows) and hands high-severity findings straight back, so the agent fixes them before moving on. Runs locally, no account needed.",
+  "author": {
+    "name": "SPHIOR",
+    "email": "support@sphior.com"
+  },
+  "homepage": "https://sphior.com/code",
+  "repository": "https://github.com/Toraastrta/sphior-code",
+  "documentationUrl": "https://github.com/Toraastrta/sphior-code#readme",
+  "supportUrl": "https://sphior.com/support",
+  "privacyPolicyUrl": "https://sphior.com/privacy",
+  "termsOfServiceUrl": "https://sphior.com/terms",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "sast",
+    "secrets",
+    "cwe",
+    "hooks",
+    "vibe-coding"
+  ]
+}

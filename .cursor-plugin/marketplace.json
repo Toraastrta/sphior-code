@@ -12,6 +12,11 @@
       "name": "sphior-code",
       "source": "plugin",
       "description": "Deterministic security scanning with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally, no account needed."
+    },
+    {
+      "name": "sphior-code-guard",
+      "source": "guard",
+      "description": "Scan every file your agent writes or edits and hand high-severity findings back to fix. Runs locally, no account needed."
     }
   ]
 }

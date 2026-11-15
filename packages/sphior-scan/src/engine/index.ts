@@ -21,7 +21,7 @@ export { merkleRoot, countBySeverity } from "./evidence/merkle";
 export { buildEvidenceRecord, recomputeRecordHash, type EvidenceRecord, type EvidenceRecordInput } from "./evidence/record";
 export { verifyChain, type ChainVerifyResult } from "./evidence/chain";
 export { buildPackManifest, verifyPackManifest, type PackManifest, type PackEntry, type PackVerifyResult } from "./evidence/pack";
-export { rowToEvidenceRecord, verifyEvidenceRows, verifyEvidenceWindow, buildEvidencePackFromRows, type EvidenceRow, type RowsVerifyResult, type EvidencePack } from "./evidence/verify-rows";
+export { rowToEvidenceRecord, verifyEvidenceRows, verifyEvidenceWindow, buildEvidencePackFromRows, EVIDENCE_ROW_COLUMNS, type EvidenceRow, type RowsVerifyResult, type EvidencePack } from "./evidence/verify-rows";
 // CLI / 収集（GitHub Action・self-host の基盤）
 export { collectSourceFiles, readSphiorignore, type CollectedFile, type CollectOptions } from "./collect";
 // 除外（走査しない）と抑制（見たうえで受け入れた）— ノイズ対策の正本

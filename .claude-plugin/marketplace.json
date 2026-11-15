@@ -19,6 +19,19 @@
         "name": "SPHIOR",
         "email": "support@sphior.com"
       }
+    },
+    {
+      "name": "sphior-code-guard",
+      "displayName": "SPHIOR CODE Guard",
+      "source": "./guard",
+      "description": "Scans every file your agent writes or edits with SPHIOR CODE's deterministic rules (secrets, CWE patterns, taint flows) and hands high-severity findings straight back, so the agent fixes them before moving on. Runs locally, no account needed.",
+      "version": "0.1.0",
+      "category": "security",
+      "homepage": "https://sphior.com/code",
+      "author": {
+        "name": "SPHIOR",
+        "email": "support@sphior.com"
+      }
     }
   ]
 }

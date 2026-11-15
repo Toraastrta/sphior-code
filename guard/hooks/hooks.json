@@ -1,0 +1,17 @@
+{
+  "description": "SPHIOR CODE guard: scan each file right after the agent writes or edits it, and hand high-severity findings back so the agent fixes them.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scan-on-write.mjs\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

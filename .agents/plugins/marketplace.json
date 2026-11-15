@@ -1,0 +1,32 @@
+{
+  "name": "sphior",
+  "interface": {
+    "displayName": "SPHIOR"
+  },
+  "plugins": [
+    {
+      "name": "sphior-code",
+      "source": {
+        "source": "local",
+        "path": "./agent-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Security"
+    },
+    {
+      "name": "sphior-code-guard",
+      "source": {
+        "source": "local",
+        "path": "./guard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Security"
+    }
+  ]
+}

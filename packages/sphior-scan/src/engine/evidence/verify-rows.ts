@@ -13,6 +13,7 @@
 
 import type { CanonicalFinding, Severity } from "../types";
 import type { EvidenceRecord } from "./record";
+import type { ScanScope } from "../scope";
 import { recomputeRecordHash } from "./record";
 import { verifyChain, type ChainVerifyResult } from "./chain";
 import { merkleRoot } from "./merkle";
@@ -38,7 +39,22 @@ export interface EvidenceRow {
   created_at?: string;
   mode?: string | null;
   pr_number?: number | null;
+  /**
+   * 検査範囲（v189 で列を追加）。record_hash の封筒の中に入るので、保存と復元で落とすと
+   * scope 付きの行は必ず record_hash_mismatch になる。NULL = 範囲を記録する前の行
+   * （封筒に scope キーが無い）。
+   */
+  scope?: ScanScope | null;
 }
+
+/**
+ * 検証に必要な列の正本。読み出し側（API・月次レポート）はこれを使い、
+ * ハッシュの封筒に入る列を select し忘れないようにする（scope の取りこぼしの再発防止）。
+ */
+export const EVIDENCE_ROW_COLUMNS =
+  "repo_full_name, branch, commit_sha, pr_number, mode, engine_version, ruleset_version, " +
+  "advisory_db_snapshot, scanned_at, actor, prev_record_hash, findings_merkle_root, " +
+  "finding_count, finding_count_by_severity, record_hash, findings, scope, created_at";
 
 /** DB の timestamptz を hash 時の正準形（ms 精度 "Z"）へ戻す。 */
 function normalizeScannedAt(s: string): string {
@@ -68,6 +84,9 @@ export function rowToEvidenceRecord(row: EvidenceRow): EvidenceRecord {
     finding_count: row.finding_count,
     finding_count_by_severity: row.finding_count_by_severity as Record<Severity, number>,
     record_hash: row.record_hash,
+    // NULL は「scope を記録する前」= 封筒に scope キーが無い。undefined のまま返し、
+    // canonicalJson が落とすようにする（null を入れると別のハッシュになる）。
+    ...(row.scope != null ? { scope: row.scope } : {}),
   };
 }
 

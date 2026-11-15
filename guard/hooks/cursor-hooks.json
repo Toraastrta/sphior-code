@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/scan-on-write.mjs\"",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/scan-on-write.mjs\"",
+        "timeout": 120,
+        "loop_limit": 3
+      }
+    ]
+  }
+}

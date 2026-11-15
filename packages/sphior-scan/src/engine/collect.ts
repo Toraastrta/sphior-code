@@ -107,6 +107,31 @@ export function collectSourceFiles(rootDir: string, opts: CollectOptions = {}): 
   return files;
 }
 
+/** 1 つのファイルを読んだ結果。読めなかった時は、読まなかった理由を返す（黙って 0 件にしない）。 */
+export type SingleFileResult =
+  | { file: CollectedFile }
+  | { skipped: "excluded" | "too_large" | "binary" | "unreadable" };
+
+/**
+ * 1 つのファイルを、ディレクトリの走査と同じ基準（サイズ・バイナリ・`.sphiorignore` の除外）で読む。
+ * 書くたびの検査（AI のエージェントやエディタのフックが、直したファイルだけを渡す）のため（2026-11-15）。
+ * rootDir は `.sphiorignore` の照合と、所見に出す相対パスの基準。
+ */
+export function collectSingleFile(rootDir: string, fullPath: string, opts: CollectOptions = {}): SingleFileResult {
+  const maxBytes = opts.maxBytes ?? 512 * 1024;
+  const rel = toPosix(relative(rootDir, fullPath));
+  if (opts.exclude?.(rel)) return { skipped: "excluded" };
+  let buf: Buffer;
+  try {
+    if (statSync(fullPath).size > maxBytes) return { skipped: "too_large" };
+    buf = readFileSync(fullPath);
+  } catch {
+    return { skipped: "unreadable" };
+  }
+  if (isBinary(buf)) return { skipped: "binary" };
+  return { file: { path: rel, text: buf.toString("utf8") } };
+}
+
 /**
  * 走査ルート直下の `.sphiorignore` を読む（無ければ空設定）。
  * 解析自体は suppress.ts（純関数）。I/O はこの層に閉じる。
