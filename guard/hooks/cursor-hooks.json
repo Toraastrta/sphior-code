@@ -1,17 +1,10 @@
 {
   "version": 1,
   "hooks": {
-    "afterFileEdit": [
+    "postToolUse": [
       {
-        "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/scan-on-write.mjs\"",
-        "timeout": 10
-      }
-    ],
-    "stop": [
-      {
-        "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/scan-on-write.mjs\"",
-        "timeout": 120,
-        "loop_limit": 3
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/scan-on-write.mjs\" cursor",
+        "timeout": 60
       }
     ]
   }

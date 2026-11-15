@@ -2,7 +2,7 @@
 /**
  * scan-on-write.mjs — AI のエージェントがファイルを書くたびに、そのファイルだけを SPHIOR CODE で検査する（2026-11-15）
  *
- * 1 本の台本で 3 つのツールのフックに答える（入力の hook_event_name で見分ける）:
+ * 1 本の台本で 3 つのツールのフックに答える（Cursor は引数 `cursor` で呼ぶ・他は入力の tool_name で見分ける）:
  *
  *   Claude Code  PostToolUse（Write / Edit / MultiEdit の後）
  *                入力 tool_input.file_path → 所見があれば標準エラーに書いて exit 2（エージェントに返る）
@@ -10,9 +10,9 @@
  *                入力 tool_input.command（パッチの本文）から書いたファイルを拾う
  *                → 所見は hookSpecificOutput.additionalContext で添える（exit 0）。Codex は exit 2 を
  *                  「編集が止められた」と受け取り、保存済みなのに「何も変更していない」と答えてしまうため
- *   Cursor       afterFileEdit で編集したファイルを記録し（エージェントへは返せない）、
- *                stop（エージェントが一区切りついた時）でまとめて検査 → { followup_message } で直すよう続きを頼む
- *                Cursor 公式のプラグインと同じ型。続きの回数は hooks の loop_limit で抑える
+ *   Cursor       postToolUse（書く道具の後）。入力 tool_input.file_path
+ *                → 所見は { additional_context } で道具の結果の後に添える（exit 0）
+ *                afterFileEdit＋stop の型は、Cursor の CLI の一回きりの実行で stop が呼ばれないため使わない
  *
  * 何も無ければ黙る（会話を汚さない）。検査そのものが動かなかった時（npx が無い・初回の取得ができない等）は
  * エージェントの作業を止めず、「検査しなかった」ことだけを一行出す。「検査して 0 件」と「検査していない」を混ぜないため。
@@ -24,7 +24,7 @@
  * プロジェクトで除外したい物は、いつもどおり `.sphiorignore` に書く（CLI がそのまま尊重する）。
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, relative, resolve } from "node:path";
 
@@ -33,8 +33,6 @@ const SCAN_PACKAGE = "@sphior/scan@0.1.10";
 const SEVERITY_ORDER = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };
 // 1 回に返す所見の数の上限（エージェントの文脈を溢れさせない。残りは件数で伝える）
 const MAX_REPORTED = 10;
-// 1 回の stop でまとめて検査するファイルの上限（Cursor。大量の書き換えでフックの時間切れにしない）
-const MAX_FILES_PER_STOP = 20;
 // 1 ファイルの検査の時間の上限。初回は npx の取得が入るので長めにとる（フック自体の上限は hooks の timeout 側）
 const SCAN_TIMEOUT_MS = 50_000;
 
@@ -51,20 +49,14 @@ function main() {
   const input = readStdin();
   if (!input) return finish(0);
 
-  switch (input.hook_event_name) {
-    case "afterFileEdit":
-      return cursorRecord(input);
-    case "stop":
-      return cursorStop(input);
-    default:
-      return postToolUse(input);
-  }
+  if (process.argv[2] === "cursor") return cursorPostToolUse(input);
+  return postToolUse(input);
 }
 
 // ── Claude Code・Codex: 書いた直後に検査し、所見は exit 2 で返す ────────────────
 function postToolUse(input) {
   const cwd = typeof input.cwd === "string" && input.cwd ? input.cwd : process.cwd();
-  const files = writtenFiles(input.tool_input).map((p) => resolve(cwd, p));
+  const files = writtenFiles(input.tool_input).map((p) => resolve(cwd, p)).filter((p) => existsSync(p));
   if (files.length === 0) return finish(0);
 
   const { report, notScanned } = scanAll(files, cwd);
@@ -90,49 +82,23 @@ function writtenFiles(toolInput) {
   return [...paths];
 }
 
-// ── Cursor: afterFileEdit で記録し、stop でまとめて検査して続きを頼む ─────────────
-/** 会話ごとの記録ファイル。会話の ID は英数字と - _ だけにして、パスに使っても外へ出ないようにする */
-function statePath(input) {
-  const id = String(input.conversation_id || input.session_id || "default").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 128) || "default";
-  const dir = join(tmpdir(), "sphior-guard");
-  mkdirSync(dir, { recursive: true, mode: 0o700 });
-  return join(dir, `${id}.json`);
-}
+// ── Cursor: 編集の直後（postToolUse）に検査し、所見は additional_context で添える ──────────
+/**
+ * Cursor の CLI の一回きりの実行では stop が呼ばれない（2026-11-15 に実機で確認）ため、編集の直後に返す。
+ * postToolUse は読むだけの道具（Read 等）でも file_path を持つので、書く道具だけに絞る。
+ */
+const CURSOR_WRITE_TOOLS = /^(Write|Edit|MultiEdit|StrReplace|search_replace|edit_file)$/;
 
-function readState(path) {
-  try {
-    const v = JSON.parse(readFileSync(path, "utf8"));
-    return Array.isArray(v) ? v.filter((p) => typeof p === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function cursorRecord(input) {
-  if (typeof input.file_path !== "string" || !input.file_path) return finish(0);
-  const path = statePath(input);
-  const files = new Set(readState(path));
-  files.add(resolve(cursorRoot(input), input.file_path));
-  writeFileSync(path, JSON.stringify([...files]), { mode: 0o600 });
-  return finish(0);
-}
-
-function cursorStop(input) {
-  const path = statePath(input);
-  const files = readState(path).filter((p) => existsSync(p));
-  rmSync(path, { force: true });
-  // 中断・エラーで止まった時は続きを頼まない（記録は捨てる。次に書いた時にまた検査される）
-  if (files.length === 0 || (input.status && input.status !== "completed")) return reply({});
-
-  const cwd = cursorRoot(input);
-  const { report, notScanned } = scanAll(files.slice(0, MAX_FILES_PER_STOP), cwd);
-  for (const line of notScanned) process.stderr.write(`${line}\n`);
-  return reply(report ? { followup_message: report } : {});
-}
-
-function cursorRoot(input) {
+function cursorPostToolUse(input) {
+  if (!CURSOR_WRITE_TOOLS.test(String(input.tool_name || ""))) return reply({});
   const roots = Array.isArray(input.workspace_roots) ? input.workspace_roots : [];
-  return (typeof roots[0] === "string" && roots[0]) || process.env.CURSOR_PROJECT_DIR || process.cwd();
+  const cwd = (typeof input.cwd === "string" && input.cwd) || (typeof roots[0] === "string" && roots[0]) || process.env.CURSOR_PROJECT_DIR || process.cwd();
+  const files = writtenFiles(input.tool_input).map((p) => resolve(cwd, p)).filter((p) => existsSync(p));
+  if (files.length === 0) return reply({});
+
+  const { report, notScanned } = scanAll(files, cwd);
+  for (const line of notScanned) process.stderr.write(`${line}\n`);
+  return reply(report ? { additional_context: report } : {});
 }
 
 function reply(obj) {

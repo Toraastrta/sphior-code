@@ -630,7 +630,7 @@ use), the agent keeps working and you see one line saying the file was not scann
 |---|---|---|
 | **Claude Code** | Right after each write or edit | Returned with the tool result |
 | **Codex** | Right after each patch | Added to the turn's context |
-| **Cursor** | When the agent finishes a turn, for every file it edited | Sent as a follow-up message (at most 3 in a row) |
+| **Cursor** | Right after each edit | Added after the tool result |
 
 **Claude Code**
 
@@ -772,7 +772,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | `@sphior/scan` (CLI, language server) | 0.1.10 | `2026.10.23-24` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
 | Claude Code / Cursor plugin `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
-| Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.0 | runs `@sphior/scan@0.1.10` on each edited file |
+| Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.1 | runs `@sphior/scan@0.1.10` on each edited file |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
