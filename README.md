@@ -698,7 +698,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.9 | `2026.10.23-24` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code / Cursor plugin `sphior-code` | 0.3.0 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
+| Claude Code / Cursor plugin `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |

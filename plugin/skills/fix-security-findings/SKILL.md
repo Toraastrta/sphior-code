@@ -26,7 +26,7 @@ the repository, and read it:
 
 ```bash
 OUT=$(mktemp -d)
-npx -y @sphior/scan run <dir> --fix-context "$OUT/fix.json"
+npx -y @sphior/scan@0.1.9 run <dir> --fix-context "$OUT/fix.json"
 ```
 
 If the project's CI pins a version (`@sphior/scan@x.y.z`), use the same one so your result
