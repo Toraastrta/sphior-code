@@ -30,7 +30,7 @@ the same findings.
 - [VS Code](#vs-code)
 - [JetBrains IDEs](#jetbrains-ides)
 - [AI coding assistants (MCP)](#ai-coding-assistants-mcp)
-- [Agent skills](#agent-skills) — Claude Code, Codex, Cursor, GitHub Copilot, claude.ai
+- [Agent skills](#agent-skills) — Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, claude.ai
 - [Scan on every edit](#scan-on-every-edit) — Claude Code, Codex, Cursor
 - [Evidence records](#evidence-records)
 - [Privacy and data boundary](#privacy-and-data-boundary)
@@ -94,6 +94,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **Claude Code** | [plugin in this repository](#claude-code) | All four skills in one install; add the MCP server with one command. |
 | **Cursor** | [plugin in this repository](#cursor) | The same plugin for Cursor's agent: the MCP server and all four skills. |
 | **Kiro** | [`agent-plugin/`](#kiro-and-other-agent-plugins-hosts) | The four skills and the MCP server as a Kiro power (Agent Plugins format). |
+| **Gemini CLI** | [extension in this repository](#gemini-cli) | The MCP server and all four skills in one install. |
 | **Scan on every edit** | [`guard/`](#scan-on-every-edit) | Each file your agent writes is scanned, and serious findings go straight back to it to fix. Claude Code, Codex and Cursor. |
 
 ---
@@ -568,6 +569,17 @@ account. To update, run `git -C ~/.sphior-code pull` and reload.
 
 If you only want the skills, copy them as described in the next section.
 
+### Gemini CLI
+
+This repository is a Gemini CLI extension: the MCP server and all four skills in one install.
+
+```bash
+gemini extensions install https://github.com/Toraastrta/sphior-code
+```
+
+Then ask: "Scan this project for security issues and fix the critical ones." Update with
+`gemini extensions update sphior-code`.
+
 ### Kiro and other Agent Plugins hosts
 
 [`agent-plugin/`](agent-plugin) is the same four skills and MCP server in the open
@@ -771,7 +783,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.10 | `2026.10.23-24` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code / Cursor plugin `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
+| Claude Code / Cursor plugin and Gemini CLI extension `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
 | Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.1 | runs `@sphior/scan@0.1.10` on each edited file |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
@@ -789,6 +801,7 @@ that produced it.
 
 ```
 .claude-plugin/          Claude Code marketplace manifest
+gemini-extension.json    Gemini CLI extension (MCP server pin; skills/ is a copy of plugin/skills)
 plugin/                  Claude Code plugin (MCP server pin + fix-security-findings skill)
 packages/
 ├── sphior-scan/         Detection engine + language server + CLI   (@sphior/scan)
