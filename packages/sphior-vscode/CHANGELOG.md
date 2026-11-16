@@ -2,6 +2,19 @@
 
 All notable changes to the **SPHIOR CODE** VS Code extension are documented here.
 
+## [0.1.6] — 2026-11-16
+
+- Ships rule set `2026.11.16-25`, built from `@sphior/scan` 0.1.11. Editor findings
+  match the command line again.
+- New in JavaScript / TypeScript:
+  - `rejectUnauthorized: false` in `https.Agent`, `tls.connect`, axios and similar
+    (TLS certificate validation disabled, CWE-295). Words inside messages and strings
+    do not trigger it.
+  - Path traversal through `path.join` / `path.resolve` / `path.normalize`, and into
+    Express `res.sendFile` and `res.download` (CWE-22). It stays quiet when the same
+    function checks the path with `startsWith`, `includes("..")` or `path.relative`,
+    or passes `sendFile` a `root` option.
+
 ## [0.1.5] — 2026-11-12
 
 - New icon: the SPHIOR ring on black, matching the brand. No functional changes.

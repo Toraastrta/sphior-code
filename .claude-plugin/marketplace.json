@@ -12,7 +12,7 @@
       "displayName": "SPHIOR CODE",
       "source": "./plugin",
       "description": "SPHIOR CODE — deterministic security scanning (secrets, CWE patterns, taint analysis) with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally through the SPHIOR CODE CLI or MCP server, no account needed.",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "category": "security",
       "homepage": "https://sphior.com/code",
       "author": {

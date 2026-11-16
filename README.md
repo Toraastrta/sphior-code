@@ -101,10 +101,8 @@ One detection engine, several ways in. Everything in this table runs locally and
 
 ## What it detects
 
-Ruleset `2026.11.16-25`, the version shipped in `@sphior/scan` 0.1.11 and later and in `sphior-code-guard` 0.1.2.
-`sphior-code-mcp` 1.1.9 and later and the VS Code extension 0.1.3 and later bundle the previous ruleset,
-`2026.10.23-24`, which does not yet have the two JavaScript additions of 0.1.11: `rejectUnauthorized: false`
-and path traversal through `path.join` into `res.sendFile` / `res.download`.
+Ruleset `2026.11.16-25`, the version shipped in `@sphior/scan` 0.1.11 and later, `sphior-code-mcp` 1.1.13 and later,
+the VS Code extension 0.1.6 and later, and `sphior-code-guard` 0.1.2 and later.
 
 ### 1. Hard-coded secrets — 36 rules
 
@@ -558,7 +556,7 @@ claude mcp add sphior-code -- npx -y sphior-code-mcp
 ### Cursor
 
 This repository is also a Cursor plugin. It adds the MCP server (pinned to
-`sphior-code-mcp@1.1.12`) and all four skills to Cursor's agent. To install it from a clone:
+`sphior-code-mcp@1.1.13`) and all four skills to Cursor's agent. To install it from a clone:
 
 ```bash
 git clone --depth 1 https://github.com/Toraastrta/sphior-code.git ~/.sphior-code
@@ -785,11 +783,11 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | Package | Version | Ruleset bundled |
 |---|---|---|
 | `@sphior/scan` (CLI, language server) | 0.1.11 | `2026.11.16-25` |
-| `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code / Cursor plugin and Gemini CLI extension `sphior-code` | 0.3.2 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
+| `sphior-code-mcp` | 1.1.13 | `2026.11.16-25` (through `@sphior/scan` 0.1.11) |
+| Claude Code / Cursor plugin and Gemini CLI extension `sphior-code` | 0.3.3 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.13` |
 | Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.2 | runs `@sphior/scan@0.1.11` on each edited file |
-| VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
-| VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
+| VS Code extension, Visual Studio Marketplace | 0.1.6 | `2026.11.16-25` |
+| VS Code extension, Open VSX | 0.1.6 | `2026.11.16-25` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |
 | `sphior-ai-governance-mcp` | 0.2.4 | — |
 
