@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "sphior-code",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Deterministic security scanning with skills that fix findings, triage false positives, set up CI and gate releases. Runs locally through the SPHIOR CODE CLI, no account needed.",
   "author": {
     "name": "SPHIOR",

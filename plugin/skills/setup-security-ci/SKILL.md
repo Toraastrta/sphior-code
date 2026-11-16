@@ -29,7 +29,7 @@ repository:
 
 ```bash
 OUT=$(mktemp -d)
-npx -y @sphior/scan@0.1.9 run . --json "$OUT/baseline.json"
+npx -y @sphior/scan@0.1.11 run . --json "$OUT/baseline.json"
 ```
 
 Read the summary line (counts by severity, files scanned, engine and ruleset versions). Then

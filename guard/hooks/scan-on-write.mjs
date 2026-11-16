@@ -29,7 +29,7 @@ import { tmpdir } from "node:os";
 import { isAbsolute, join, relative, resolve } from "node:path";
 
 // 検査の CLI の版は固定する（毎回同じ規則で検査し、知らないうちに中身が変わらないように）
-const SCAN_PACKAGE = "@sphior/scan@0.1.10";
+const SCAN_PACKAGE = "@sphior/scan@0.1.11";
 const SEVERITY_ORDER = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };
 // 1 回に返す所見の数の上限（エージェントの文脈を溢れさせない。残りは件数で伝える）
 const MAX_REPORTED = 10;

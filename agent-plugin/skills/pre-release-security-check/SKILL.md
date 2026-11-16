@@ -16,7 +16,7 @@ pins a scanner version, use the same one. Write outside the repository:
 
 ```bash
 OUT=$(mktemp -d)
-npx -y @sphior/scan@0.1.9 run . --json "$OUT/open.json" --suppressed "$OUT/accepted.json"
+npx -y @sphior/scan@0.1.11 run . --json "$OUT/open.json" --suppressed "$OUT/accepted.json"
 ```
 
 Keep the summary line from standard error: it records files scanned, files excluded, accepted

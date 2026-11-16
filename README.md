@@ -101,7 +101,10 @@ One detection engine, several ways in. Everything in this table runs locally and
 
 ## What it detects
 
-Ruleset `2026.10.23-24`, the version shipped in `@sphior/scan` 0.1.7 and later, `sphior-code-mcp` 1.1.9 and later, and the VS Code extension 0.1.3 and later.
+Ruleset `2026.11.16-25`, the version shipped in `@sphior/scan` 0.1.11 and later and in `sphior-code-guard` 0.1.2.
+`sphior-code-mcp` 1.1.9 and later and the VS Code extension 0.1.3 and later bundle the previous ruleset,
+`2026.10.23-24`, which does not yet have the two JavaScript additions of 0.1.11: `rejectUnauthorized: false`
+and path traversal through `path.join` into `res.sendFile` / `res.download`.
 
 ### 1. Hard-coded secrets — 36 rules
 
@@ -118,7 +121,7 @@ Provider-specific signatures plus one generic high-entropy rule.
 Secrets are searched in **every text file**, not only source files. `.env*`, `.github/` and
 `*.example` files are deliberately scanned, because real keys end up there.
 
-### 2. Insecure code patterns — 84 rules
+### 2. Insecure code patterns — 85 rules
 
 Rules for constructs that are dangerous on their own, each mapped to a CWE and an OWASP Top 10
 (2021) category.
@@ -127,7 +130,7 @@ Rules for constructs that are dangerous on their own, each mapped to a CWE and a
 |---|---:|---|---:|
 | Python | 19 | Ruby | 6 |
 | Java | 12 | Go | 5 |
-| JavaScript / TypeScript | 12 | C# | 4 |
+| JavaScript / TypeScript | 13 | C# | 4 |
 | PHP | 8 | Kotlin | 4 |
 | C / C++ | 3 | Rust | 3 |
 | SQL | 3 | Swift | 3 |
@@ -150,7 +153,7 @@ file**, including calls more than one level deep.
 
 | Language | Parser | Sinks |
 |---|---|---|
-| JavaScript / TypeScript | Babel AST | command · code (`eval`, `vm`, `new Function`, dynamic `require`) · SQL · XSS · SSRF · path traversal · open redirect · NoSQL · header injection · prototype pollution |
+| JavaScript / TypeScript | Babel AST | command · code (`eval`, `vm`, `new Function`, dynamic `require`) · SQL · XSS · SSRF · path traversal (`fs`, `res.sendFile`, `res.download`, through `path.join` / `resolve`) · open redirect · NoSQL · header injection · prototype pollution |
 | Python | tree-sitter | code · command · SQL · SSRF · template injection · XSS · deserialization · NoSQL · XXE · XPath · LDAP · path traversal |
 | PHP | tree-sitter | command · code · SQL · file inclusion · path traversal · XSS |
 | Ruby | tree-sitter | command · code · SQL · SSRF · path traversal · XSS |
@@ -289,14 +292,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx -y @sphior/scan@0.1.8 run . --sarif sphior.sarif --fail-on high
+      - run: npx -y @sphior/scan@0.1.11 run . --sarif sphior.sarif --fail-on high
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: sphior.sarif
 ```
 
-- Pin the version (`@sphior/scan@0.1.8`) so a ruleset update never changes results without a
+- Pin the version (`@sphior/scan@0.1.11`) so a ruleset update never changes results without a
   commit on your side.
 - Each SARIF rule carries `security-severity` (9.5 / 8.0 / 5.5 / 3.0 / 1.0 for critical → info)
   and CWE / OWASP tags, and each result a `sphiorFingerprint`, so GitHub ranks alerts and tracks
@@ -634,7 +637,7 @@ edits, it scans that one file and hands anything **high or critical** straight b
 the line, why it matters and how to fix it. The agent fixes it before moving on, and the next edit
 is scanned again. When the file is clean it says nothing.
 
-It runs `npx @sphior/scan@0.1.10 run <file>` on your machine. No account, nothing uploaded. Paths
+It runs `npx @sphior/scan@0.1.11 run <file>` on your machine. No account, nothing uploaded. Paths
 in `.sphiorignore` are skipped as usual. If the scanner cannot run (no Node.js, offline on first
 use), the agent keeps working and you see one line saying the file was not scanned.
 
@@ -781,10 +784,10 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 
 | Package | Version | Ruleset bundled |
 |---|---|---|
-| `@sphior/scan` (CLI, language server) | 0.1.10 | `2026.10.23-24` |
+| `@sphior/scan` (CLI, language server) | 0.1.11 | `2026.11.16-25` |
 | `sphior-code-mcp` | 1.1.12 | `2026.10.23-24` (through `@sphior/scan` 0.1.9) |
-| Claude Code / Cursor plugin and Gemini CLI extension `sphior-code` | 0.3.1 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
-| Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.1 | runs `@sphior/scan@0.1.10` on each edited file |
+| Claude Code / Cursor plugin and Gemini CLI extension `sphior-code` | 0.3.2 | four skills; the Cursor plugin also starts `sphior-code-mcp@1.1.12` |
+| Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.2 | runs `@sphior/scan@0.1.11` on each edited file |
 | VS Code extension, Visual Studio Marketplace | 0.1.5 | `2026.10.23-24` |
 | VS Code extension, Open VSX | 0.1.5 | `2026.10.23-24` |
 | JetBrains plugin | 0.1.1 | `2026.07.12-22` |

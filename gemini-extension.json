@@ -1,6 +1,6 @@
 {
   "name": "sphior-code",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Find and fix security issues in 14 languages: hard-coded secrets, insecure patterns mapped to CWE and taint flows. Deterministic rules, an MCP server and four skills. Runs locally, no account.",
   "mcpServers": {
     "sphior-code": {

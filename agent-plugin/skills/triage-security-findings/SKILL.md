@@ -15,7 +15,7 @@ Use the command line for triage (Node.js 18+). Write outside the repository:
 
 ```bash
 OUT=$(mktemp -d)
-npx -y @sphior/scan@0.1.9 run . --json "$OUT/findings.json" --suppressed "$OUT/accepted.json"
+npx -y @sphior/scan@0.1.11 run . --json "$OUT/findings.json" --suppressed "$OUT/accepted.json"
 ```
 
 Use the same scanner version as the project's CI if it pins one. Keep the summary line from
