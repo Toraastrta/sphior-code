@@ -22,6 +22,14 @@
 
     <!-- Marketplace の「What's New」欄。版ごとの変更点を利用者の言葉で書く -->
     <change-notes><![CDATA[
+      <p><b>0.1.3</b></p>
+      <ul>
+        <li>Ships rule set <code>2026.11.16-25</code>, the same as <code>@sphior/scan</code> 0.1.11 on the command line.</li>
+        <li>New in JavaScript/TypeScript: <code>rejectUnauthorized: false</code> (TLS certificate validation disabled),
+        and path traversal through <code>path.join</code> / <code>path.resolve</code> into <code>fs</code>,
+        <code>res.sendFile</code> and <code>res.download</code>. It stays quiet when the path is checked with
+        <code>startsWith</code>, <code>includes("..")</code> or <code>path.relative</code>.</li>
+      </ul>
       <p><b>0.1.2</b></p>
       <ul>
         <li>Ships the current rule set, <code>2026.10.23-24</code>, the same as <code>@sphior/scan</code> 0.1.8 on the command line.</li>
