@@ -90,6 +90,25 @@ export const PATTERN_RULES: PatternRule[] = [
     pattern: /NODE_TLS_REJECT_UNAUTHORIZED\s*[:=]\s*['"`]?0/g,
   },
   {
+    // 2026-11-16: 公開前の自己点検で見逃しを確認した。上の規則は環境変数の形しか
+    // 見ておらず、Node で最も多い書き方である https.Agent / tls.connect / axios /
+    // got 等の `rejectUnauthorized: false` が素通りしていた（Python の verify=False は
+    // 拾えるのに Node の同等物は拾えなかった）。
+    //
+    // 0-FP の作り: キー名と値 `false` の組に固定する。`rejectUnauthorized: true` や
+    // 変数（`rejectUnauthorized: isProd`）には当たらない。オブジェクトのキー（引用符
+    // 付きも含む）と代入（`opts.rejectUnauthorized = false`）の両方を拾う。
+    id: "pattern.js.tls_reject_unauthorized_false",
+    cwe: "CWE-295",
+    owasp: "A05:2021",
+    severity: "high",
+    title: "TLS certificate validation disabled (rejectUnauthorized: false)",
+    message: "rejectUnauthorized: false accepts any certificate, so a man-in-the-middle can read or change the traffic.",
+    remediation: "Remove rejectUnauthorized: false. For a private CA, pass its certificate with the ca option instead.",
+    exts: JS,
+    pattern: /['"]?\brejectUnauthorized['"]?\s*[:=]\s*false\b/g,
+  },
+  {
     id: "pattern.js.weak_hash",
     cwe: "CWE-327",
     owasp: "A02:2021",

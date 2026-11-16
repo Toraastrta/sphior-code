@@ -66,7 +66,7 @@ const TAINT_RULES: Record<string, TaintRule & { references: string[] }> = {
   "taint.js.path_traversal": {
     id: "taint.js.path_traversal", cwe: "CWE-22", owasp: "A01:2021", severity: "high",
     title: "Path traversal (untrusted input → filesystem path)",
-    message: "Untrusted input controls a filesystem path (fs.*) — path traversal / arbitrary file access.",
+    message: "Untrusted input controls a filesystem path (fs.* / res.sendFile / res.download) — path traversal / arbitrary file access.",
     remediation: "Resolve and validate the path against an allowed base dir; reject '..'.",
     references: REF("22"),
   },
@@ -142,6 +142,20 @@ const SOURCE_CALL_SUFFIXES = [
 // 値を保持して読み出す型だけに限定する（RegExp/Error 等は別の問題なので入れない）。
 const TAINT_WRAPPER_CTORS = new Set(["URLSearchParams", "URL"]);
 
+// パスを組み立てる関数。引数のどれかが汚染なら戻り値も汚染として扱う。
+//
+// 2026-11-16: 公開前の自己点検で見逃しを確認した。`path.join(__dirname, "files",
+// req.query.name)` は Node でパスを作る最も普通の書き方だが、従来は呼び出しの戻り値を
+// 汚染と見なさず、その先の fs.readFile / res.sendFile が全て素通りしていた。
+// path.basename は `..` を落とす（無害化）ので**入れない**。
+const PATH_COMBINERS = new Set(
+  ["path", "path.posix", "path.win32"].flatMap((m) => ["join", "resolve", "normalize"].map((f) => `${m}.${f}`)),
+);
+
+// Express のファイル送出（第 1 引数がパス）。
+// `{ root: dir }` を渡した形は Express（send）が `..` を含むパスを 403 で拒むので sink にしない。
+const FILE_SEND_METHODS = new Set(["sendFile", "download"]);
+
 // スコープ境界（nested 関数は別スコープ）
 const SCOPE_TYPES = new Set([
   "FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression",
@@ -191,6 +205,10 @@ function exprIsTainted(node: AstNode | undefined, tainted: Set<string>): boolean
     case "CallExpression": {
       if (isSourceExpr(node)) return true;
       const callee = node.callee as AstNode | undefined;
+      // path.join / resolve / normalize は引数の汚染を戻り値へ運ぶ
+      if (PATH_COMBINERS.has(memberPath(callee) ?? "")) {
+        return ((node.arguments as AstNode[] | undefined) ?? []).some((a) => exprIsTainted(a, tainted));
+      }
       return !!callee && callee.type === "MemberExpression" && exprIsTainted(callee.object as AstNode, tainted);
     }
     case "TemplateLiteral":
@@ -314,9 +332,61 @@ function collectFsImportedNames(ast: unknown): Set<string> {
   return names;
 }
 
+/**
+ * スコープ内で「パスとして確かめられている」変数名を集める（path traversal の無害化の目印）。
+ *
+ * 認める確かめ方（いずれも同じスコープ内）:
+ * - `x.startsWith(...)`            … 許可したベースの下にあるかの確認
+ * - `x.includes("..")` / `x.indexOf("..")` … `..` を含む入力の拒否
+ * - `path.relative(base, x)`       … ベースからの相対で外へ出ていないかの確認
+ *
+ * 確かめ方の正しさ（resolve してから比べているか等）までは判定しない。
+ * 設計方針どおり、誤検知より見逃しを選ぶ（ファイル冒頭の注記）。
+ */
+function collectPathGuards(scope: AstNode): Set<string> {
+  const guarded = new Set<string>();
+  walkScope(scope, (n) => {
+    if (n.type !== "CallExpression") return;
+    const callee = n.callee as AstNode | undefined;
+    const args = (n.arguments as AstNode[] | undefined) ?? [];
+    if (callee && callee.type === "MemberExpression") {
+      const obj = callee.object as AstNode | undefined;
+      const method = calleeMethodName(n);
+      const objName = obj && obj.type === "Identifier" && typeof obj.name === "string" ? obj.name : null;
+      if (objName && method === "startsWith") guarded.add(objName);
+      if (objName && (method === "includes" || method === "indexOf") &&
+          typeof args[0]?.value === "string" && (args[0].value as string).includes("..")) guarded.add(objName);
+    }
+    if (/^path(?:\.posix|\.win32)?\.relative$/.test(memberPath(callee) ?? "")) {
+      for (const a of args) if (a.type === "Identifier" && typeof a.name === "string") guarded.add(a.name);
+    }
+  });
+  return guarded;
+}
+
+/** 式の中に、確かめ済みの変数が 1 つでも使われているか（nested 関数には入らない）。 */
+function usesGuardedName(node: AstNode | undefined, guarded: ReadonlySet<string>): boolean {
+  if (!node || guarded.size === 0) return false;
+  let found = false;
+  walkScope(node, (n) => {
+    if (!found && n.type === "Identifier" && typeof n.name === "string" && guarded.has(n.name)) found = true;
+  });
+  return found;
+}
+
+/** 第 2 引数が `{ root: ... }` を持つか（res.sendFile(name, { root }) の安全な形）。 */
+function hasRootOption(node: AstNode | undefined): boolean {
+  if (!node || node.type !== "ObjectExpression") return false;
+  return ((node.properties as AstNode[] | undefined) ?? []).some((p) => {
+    const key = p.key as AstNode | undefined;
+    return !!key && (key.name === "root" || key.value === "root");
+  });
+}
+
 function scanSinks(scope: AstNode, tainted: Set<string>, fsNames: ReadonlySet<string> = new Set()): SinkHit[] {
   const hits: SinkHit[] = [];
   const hit = (ruleId: string, node: AstNode): void => { hits.push({ ruleId, node }); };
+  const pathGuards = collectPathGuards(scope);
   walkScope(scope, (n) => {
     if (n.type === "CallExpression") {
       const arg0 = (n.arguments as AstNode[] | undefined)?.[0];
@@ -333,10 +403,18 @@ function scanSinks(scope: AstNode, tainted: Set<string>, fsNames: ReadonlySet<st
         ((idName === "fetch" || idName === "axios" || idName === "got") && exprIsTainted(arg0, tainted)) ||
         (!!method && HTTP_METHODS.has(method) && !!objPath && HTTP_CLIENT_OBJECTS.has(objPath) && exprIsTainted(arg0, tainted))
       ) hit("taint.js.ssrf", n);
-      else if (!!method && FS_METHODS.has(method) && !!objPath && (objPath === "fs" || objPath === "fs.promises" || objPath === "fsp") && exprIsTainted(arg0, tainted)) hit("taint.js.path_traversal", n);
+      // path traversal の sink は、同じスコープで確かめ済みの変数を使っていれば鳴らさない
+      else if (!!method && FS_METHODS.has(method) && !!objPath && (objPath === "fs" || objPath === "fs.promises" || objPath === "fsp") && exprIsTainted(arg0, tainted) && !usesGuardedName(arg0, pathGuards)) hit("taint.js.path_traversal", n);
       // 裸呼び: import { readFileSync } from "node:fs" の形。**import 由来と確認済みの
       // 名前だけ**を sink にする（同名のローカル関数で誤検知しないため）。
-      else if (!!idName && fsNames.has(idName) && exprIsTainted(arg0, tainted)) hit("taint.js.path_traversal", n);
+      else if (!!idName && fsNames.has(idName) && exprIsTainted(arg0, tainted) && !usesGuardedName(arg0, pathGuards)) hit("taint.js.path_traversal", n);
+      // Express のファイル送出: res.sendFile / res.download の第 1 引数が汚染。
+      // `{ root }` 付きは Express 側が `..` を拒むので除く。
+      else if (
+        !!method && FILE_SEND_METHODS.has(method) && !!objPath && (objPath === "res" || objPath === "response") &&
+        exprIsTainted(arg0, tainted) && !usesGuardedName(arg0, pathGuards) &&
+        !hasRootOption((n.arguments as AstNode[] | undefined)?.[1])
+      ) hit("taint.js.path_traversal", n);
       else if (REDIRECT_CALLS.has(memberPath(callee) ?? "") && exprIsTainted(arg0, tainted)) hit("taint.js.open_redirect", n);
       // 反射型 XSS: res.send/write/end に汚染をそのまま返す（Express 等）
       else if (!!method && ["send", "write", "end"].includes(method) && !!objPath && (objPath === "res" || objPath === "response") && exprIsTainted(arg0, tainted)) hit("taint.js.xss", n);

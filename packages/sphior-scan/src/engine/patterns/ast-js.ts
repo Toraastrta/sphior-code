@@ -22,7 +22,22 @@ export const AST_JS_RULE_IDS = new Set<string>([
   "pattern.js.settimeout_string",
   "pattern.js.child_process_shell",
   "pattern.js.react_dangerous_html",
+  // 2026-11-16: regex だと所見の説明文やエラー文の中の "rejectUnauthorized: false" にも当たる
+  // （自社コードの実測で 2 件）。オブジェクトのキーと代入だけを AST で判定する。
+  "pattern.js.tls_reject_unauthorized_false",
 ]);
+
+/** プロパティのキー名（識別子・文字列キーの両方）。computed は対象外。 */
+function propKeyName(prop: AstNode): string | undefined {
+  if (prop.computed) return undefined;
+  const key = prop.key as AstNode | undefined;
+  return key ? ((key.name as string | undefined) ?? (key.value as string | undefined)) : undefined;
+}
+
+/** 値が真偽値の false そのものか（`false` リテラル）。変数や式は判定しない。 */
+function isFalseLiteral(node: AstNode | undefined): boolean {
+  return !!node && node.type === "BooleanLiteral" && node.value === false;
+}
 
 const RULE_BY_ID = new Map(PATTERN_RULES.map((r) => [r.id, r]));
 const JS_EXTS = new Set(["js", "jsx", "ts", "tsx", "mjs", "cjs"]);
@@ -170,6 +185,18 @@ export function detectPatternsFromAst(ast: unknown, path: string, text: string):
       }
     } else if (node.type === "NewExpression") {
       if (calleeName(node) === "Function") add("pattern.js.new_function", node);
+    } else if (node.type === "ObjectProperty") {
+      // { rejectUnauthorized: false } / { "rejectUnauthorized": false }
+      if (propKeyName(node) === "rejectUnauthorized" && isFalseLiteral(node.value as AstNode | undefined)) {
+        add("pattern.js.tls_reject_unauthorized_false", node);
+      }
+    } else if (node.type === "AssignmentExpression") {
+      // opts.rejectUnauthorized = false
+      const left = node.left as AstNode | undefined;
+      const prop = left && left.type === "MemberExpression" && !left.computed ? (left.property as AstNode | undefined) : undefined;
+      if (prop && prop.type === "Identifier" && prop.name === "rejectUnauthorized" && isFalseLiteral(node.right as AstNode | undefined)) {
+        add("pattern.js.tls_reject_unauthorized_false", node);
+      }
     } else if (node.type === "JSXAttribute") {
       const name = node.name as AstNode | undefined;
       if (name && name.type === "JSXIdentifier" && name.name === "dangerouslySetInnerHTML") {
