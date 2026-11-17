@@ -737,8 +737,16 @@ continuous scanning of your repositories and a history that outlasts any single 
 Install the [SPHIOR CODE GitHub App](https://github.com/apps/sphior-code) and it:
 
 - scans **every pull request** and every push to the default branch, with no configuration;
-- reports in a **Check Run** with line annotations, and fails it when there is a Critical or High
-  finding;
+- **reviews the pull request in comments**: one summary of what the PR introduces, fixes and leaves
+  as it was, and an inline comment on each line it added with the rule, the CWE, how to fix it and a
+  prompt to paste into Claude Code, Codex or Cursor.
+  When a later push fixes a finding or accepts it in `.sphiorignore`, its thread is resolved
+  automatically. The summary is updated in place, so a busy PR never fills up with repeated
+  comments;
+- reports the result in a **Check Run** with line annotations. By default it fails only for Critical
+  or High findings that the PR itself introduces; the threshold (Critical, High, Medium or never) and
+  whether findings already in the code count are settings. A finding you accept goes in
+  `.sphiorignore` with a reason, and the summary shows when a PR adds one;
 - checks **dependencies** in 8 ecosystems (npm, PyPI, Go, RubyGems, Packagist and others) against
   OSV advisory data, with the version to upgrade to;
 - keeps a **monthly ledger of dependency versions**, re-checks it daily against new advisories, and
@@ -749,6 +757,13 @@ Install the [SPHIOR CODE GitHub App](https://github.com/apps/sphior-code) and it
   above), which `verify_evidence` and the API can check independently;
 - shows findings, dependencies and settings in the SPHIOR console, with links that open the fix in
   Claude Code, Cursor or Codex.
+
+From an actual run on a test pull request: the summary, a line comment, and a thread that SPHIOR
+CODE resolved on its own after the finding was accepted in `.sphiorignore` with a reason.
+
+![The SPHIOR CODE summary comment on a pull request: the new critical and high issues, an accepted finding with its reason, and why the check does not pass](assets/pr-review-summary.png)
+
+![SPHIOR CODE line comments: each names the issue, the CWE, the fix and the rule; the thread for the SQL injection was resolved automatically once it was accepted with a reason](assets/pr-review-inline.png)
 
 Source is read in memory during the scan and is not stored. On the hosted service, data-flow
 analysis currently covers JavaScript and TypeScript, and other languages are checked with the
