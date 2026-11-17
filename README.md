@@ -102,7 +102,7 @@ One detection engine, several ways in. Everything in this table runs locally and
 ## What it detects
 
 Ruleset `2026.11.16-25`, the version shipped in `@sphior/scan` 0.1.11 and later, `sphior-code-mcp` 1.1.13 and later,
-the VS Code extension 0.1.6 and later, and `sphior-code-guard` 0.1.2 and later.
+the VS Code extension 0.1.6 and later, the JetBrains plugin 0.1.3 and later, and `sphior-code-guard` 0.1.2 and later.
 
 ### 1. Hard-coded secrets — 36 rules
 
@@ -803,7 +803,7 @@ See its [README](packages/ai-governance-mcp/README.md) for setup.
 | Claude Code / Codex / Cursor plugin `sphior-code-guard` | 0.1.2 | runs `@sphior/scan@0.1.11` on each edited file |
 | VS Code extension, Visual Studio Marketplace | 0.1.6 | `2026.11.16-25` |
 | VS Code extension, Open VSX | 0.1.6 | `2026.11.16-25` |
-| JetBrains plugin | 0.1.2 (0.1.3 with `2026.11.16-25` is in review) | `2026.10.23-24` |
+| JetBrains plugin | 0.1.3 | `2026.11.16-25` |
 | `sphior-ai-governance-mcp` | 0.2.4 | — |
 
 All surfaces run the same engine code, but each is released on its own schedule, so a surface
