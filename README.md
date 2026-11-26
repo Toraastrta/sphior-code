@@ -88,7 +88,6 @@ One detection engine, several ways in. Everything in this table runs locally and
 | **pre-commit** | [hook in this repository](#pre-commit) | Scan before every commit and stop it on serious findings. |
 | **VS Code** (and Cursor, Windsurf, VSCodium) | [`sphior.sphior-code`](https://marketplace.visualstudio.com/items?itemName=sphior.sphior-code) · [Open VSX](https://open-vsx.org/extension/sphior/sphior-code) | Findings as you type. A quick fix that hands the finding to your AI. |
 | **JetBrains IDEs** | [plugin 33696](https://plugins.jetbrains.com/plugin/33696-sphior-code) | The same in IntelliJ IDEA, PyCharm, WebStorm, GoLand, Rider, PhpStorm, RubyMine, CLion and others. |
-| **Zed** | [`packages/sphior-zed`](#zed) | Findings as you type, and the MCP server for Zed's agent. Two extensions. |
 | **AI coding assistants** | [`sphior-code-mcp`](https://www.npmjs.com/package/sphior-code-mcp) | An MCP server. Your assistant scans the workspace and receives the location and the remediation for each finding. |
 | **Agent skills** | [`plugin/skills`](#agent-skills) | Four skills — fix, triage, set up CI, pre-release gate — for Claude Code, Codex, Cursor, GitHub Copilot and claude.ai. |
 | **Claude Code** | [plugin in this repository](#claude-code) | All four skills in one install; add the MCP server with one command. |
@@ -416,25 +415,6 @@ JetBrains IDE from 2024.2, because files are matched by name rather than through
 
 ---
 
-## Zed
-
-Two extensions, because Zed keeps language servers and MCP servers apart:
-
-| Extension | What it does |
-|---|---|
-| `sphior-code-lsp` | Findings in the editor as you type, in JavaScript, TypeScript, Python, Go, Rust, C, C++, PHP, Ruby, Java, Kotlin, Scala, Swift and C#. |
-| `sphior-code-mcp-server` | Connects Zed's agent to the [MCP server](#ai-coding-assistants-mcp). |
-
-Both use Zed's own Node.js and install the scanner from npm on first use (`@sphior/scan` and
-`sphior-code-mcp`), so there is nothing else to set up. Neither needs an account; the MCP server
-takes an optional API key in its settings.
-
-They are submitted to Zed's extension registry. Until they appear there, install them from a clone:
-open **Extensions**, choose **Install Dev Extension**, and select `packages/sphior-zed/lsp`, then
-`packages/sphior-zed/mcp-server`.
-
----
-
 ## AI coding assistants (MCP)
 
 `sphior-code-mcp` is a Model Context Protocol server. It lets the assistant you already use —
@@ -462,6 +442,15 @@ claude mcp add sphior-code -- npx -y sphior-code-mcp
 {
   "servers": {
     "sphior-code": { "type": "stdio", "command": "npx", "args": ["-y", "sphior-code-mcp"] }
+  }
+}
+```
+
+```json
+// Zed (settings.json, or Settings → AI → MCP Servers → Add Server)
+{
+  "context_servers": {
+    "sphior-code": { "command": "npx", "args": ["-y", "sphior-code-mcp"], "env": {} }
   }
 }
 ```
